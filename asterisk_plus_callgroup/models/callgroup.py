@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 import os
 import re
-from odoo import fields, models, api
+from odoo import fields, models, api, release
 from odoo.exceptions import ValidationError
 from odoo.addons.asterisk_plus.models.settings import debug
 
@@ -33,15 +33,20 @@ class Callgroup(models.Model):
     # Prompt 1
     callgroup_voicemail_prompt1 = fields.Binary(attachment=True)
     prompt_filename1 = fields.Char(tracking=True)
-    voicemail_widget1 = fields.Char(compute='_get_voicemail_widget')
+    if release.version_info[0] >= 17.0:
+        voicemail_widget1 = fields.Html(compute='_get_voicemail_widget', sanitize=False)
+        voicemail_widget2 = fields.Html(compute='_get_voicemail_widget', sanitize=False)
+        voicemail_widget3 = fields.Html(compute='_get_voicemail_widget', sanitize=False)
+    else:
+        voicemail_widget1 = fields.Char(compute='_get_voicemail_widget')
+        voicemail_widget2 = fields.Char(compute='_get_voicemail_widget')
+        voicemail_widget3 = fields.Char(compute='_get_voicemail_widget')
     # Prompt 2
     callgroup_voicemail_prompt2 = fields.Binary(attachment=True)
     prompt_filename2 = fields.Char(tracking=True)
-    voicemail_widget2 = fields.Char(compute='_get_voicemail_widget')
     # Prompt 3
     callgroup_voicemail_prompt3 = fields.Binary(attachment=True)
     prompt_filename3 = fields.Char(tracking=True)
-    voicemail_widget3 = fields.Char(compute='_get_voicemail_widget')
     #
     active_prompt = fields.Selection(selection=
         [(str(k), 'Prompt %s' % k) for k in range(1,4)],
