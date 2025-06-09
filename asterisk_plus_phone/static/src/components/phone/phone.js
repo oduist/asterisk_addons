@@ -413,7 +413,7 @@ export class Phone extends Component {
         console.log(`[PHONE]:\n {state: ${state}}\n\nthis:${this}`)
     }
 
-    async _busPhoneMakeForward(phoneNumber) {
+    async _busPhoneMakeForward(phoneNumber, model, id, name) {
         if (this.session) {
             this.session.sendDTMF(`${this.attended_transfer_sequence}${phoneNumber}#`)
         }
