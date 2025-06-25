@@ -91,6 +91,7 @@ export class Phone extends Component {
             phone_stun_server: '',
             phone_websocket: '',
             phone_realm: '',
+            sip_auth_user: ''
         }
         this.sipRegistered = false
         this.lastActiveTab = this.tabs.phone
@@ -172,6 +173,7 @@ export class Phone extends Component {
             this.attended_transfer_sequence = phone_pbx_configs['attended_transfer_sequence']
             this.disconnect_call_sequence = phone_pbx_configs['disconnect_call_sequence']
             this.trace_sip = phone_pbx_configs['trace_sip']
+            this.phone_sip_auth_user_enabled = phone_pbx_configs['phone_sip_auth_user_enabled']
             this.contactSearch = phone_pbx_configs['transfer_contact_search']
             Object.assign(this.phone_configs, phone_pbx_configs.user_agent)
 
@@ -211,7 +213,7 @@ export class Phone extends Component {
 
         onMounted(() => {
             for (let key in this.phone_configs) {
-                if (!this.phone_configs[key]) {
+                if (key !== 'sip_auth_user' && !this.phone_configs[key]) {
                     console.error(`Missing config: "${key}" for Phone!`)
                     this.state.isActive = false
                 }
@@ -411,7 +413,7 @@ export class Phone extends Component {
         console.log(`[PHONE]:\n {state: ${state}}\n\nthis:${this}`)
     }
 
-    async _busPhoneMakeForward(phoneNumber) {
+    async _busPhoneMakeForward(phoneNumber, model, id, name) {
         if (this.session) {
             this.session.sendDTMF(`${this.attended_transfer_sequence}${phoneNumber}#`)
         }
@@ -460,6 +462,7 @@ export class Phone extends Component {
 
         const {
             sip_user,
+            sip_auth_user,
             sip_password,
             phone_sip_proxy,
             phone_sip_protocol,
@@ -486,6 +489,7 @@ export class Phone extends Component {
             contact_uri: `sip:${sip_user}@${phone_sip_proxy}`,
             register: true,
             stun_server: phone_stun_server,
+            ...(this.phone_sip_auth_user_enabled && sip_auth_user ? { authorization_user: sip_auth_user } : {})
         }
 
         try {
