@@ -17,6 +17,7 @@
                             <field name="phone_websocket" placeholder="wss://1.2.3.4:8089/ws"/>
                             <field name="phone_stun_server"/>
                             <field name="phone_sip_protocol" invisible="1"/>
+                            <field name="phone_sip_auth_user_enabled"/>
                             <field name="phone_realm" invisible="1"/>
                             <field name="trace_sip"/>
                         </group>
