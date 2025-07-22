@@ -19,9 +19,6 @@ MAX_EXTEN_LEN = 6
 FORMAT_TYPE = 'e164'
 RECORDING_ACCESS_SELECTION = [
     ('local', 'Local Download'),
-    ('remote', 'Remote Download'),
-    ('asterisk_http', 'Asterisk HTTP link'),
-    ('s3', 'S3 Storage link'),
 ]
 
 PREPAID_PAYMENT_URL = 'https://buy.stripe.com/aEU01VaER5D15lC4gj'
@@ -496,36 +493,6 @@ class Settings(models.Model):
             if rec.use_mp3_encoder:
                 rec.mp3_encoder_bitrate = '96'
                 rec.mp3_encoder_quality = '4'
-
-    def sync_recording_storage(self):
-        """Sync where call recordings are stored.
-        """
-        count = 0
-        try:
-            recordings = self.env['asterisk_plus.recording'].search([])
-            for rec in recordings:
-                if self.recording_storage == 'filestore' and not rec.recording_attachment:
-                    rec.write({
-                        'recording_data': False,
-                        'recording_attachment': rec.recording_data})
-                    count += 1
-                    self.env.cr.commit()
-                elif self.recording_storage == 'db' and not rec.recording_data:
-                    rec.write({
-                        'recording_attachment': False,
-                        'recording_data': rec.recording_attachment})
-                    count += 1
-                    self.env.cr.commit()
-                logger.info('Recording {} moved to {}'.format(rec.id, self.recording_storage))
-        except Exception as e:
-            logger.info('Sync recordings error: %s', str(e))
-        finally:
-            logger.info('Moved %s recordings', count)
-            # Perform the garbage collection of the filestore.
-            if release.version_info[0] >= 14:
-                self.env['ir.attachment']._gc_file_store()
-            else:
-                self.env['ir.attachment']._file_gc()
 
     @api.constrains('recordings_access_url')
     def _check_trailing_recordings_access_url_slash(self):

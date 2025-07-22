@@ -247,51 +247,11 @@ class PbxUser(models.Model):
 
     @api.model
     def fagi_request(self, request):
-        debug(self, 'AGI request: {}'.format(request))
-        extension = request['agi_extension']
-        agi_channel = request['agi_channel']
-        channel = re.search('^(?P<channel>.+)-.+$', agi_channel).groupdict().get('channel')
-        callerid = request['agi_callerid']
-        # Find destination users by personal number or exten
-        users = self.env['asterisk_plus.user'].search(
-            ['|', ('did_number', '=', extension), ('exten', '=', extension)])
-        endpoints = []
-        if len(users) == 1:
-            user = users[0]
-            debug(self, 'Found PBX user {} by phone {}'.format(user.name, extension))
-            for channel in users.channels:
-                endpoint = channel.name.split('/')[1]
-                endpoints.append(endpoint)
-            res = []
-            if user.record_calls:
-                now = datetime.now()
-                year = now.year
-                month = now.month
-                day = now.day
-                res.append('EXEC MIXMONITOR {}/{}/{}/{}.wav,b'.format(year, month, day, request['agi_uniqueid']))
-            res.append('PJSIP_DIAL_CONTACTS {} {},t'.format(','.join(endpoints), user.dial_timeout))
-            return res
-        elif len(users) > 1:
-            # Multiple users, no voicemail
-            debug(self, 'Found many users {} by phone {}'.format(
-                [k.name for k in users], extension))
-            for user in users:
-                for channel in users.channels:
-                    endpoint = channel.name.split('/')[1]
-                    endpoints.append(endpoint)
-            return [
-                'EXEC VERBOSE "Muliple users by number {} found."'.format(extension),
-                'PJSIP_DIAL_CONTACTS {} {},t'.format(','.join(endpoints),user.dial_timeout)
-            ]
-        else:
-            debug(self, 'No PBX user by number %s found.' % extension)
-            return []
+        logger.info('FAGI request! [REQUIRED ENTERPRISE]')
+        return []
 
     def apply_sip_peers(self):
-        # Send a message to Agent to download SIP peers
-        if self.server.generate_sip_peers:
-            self.server.local_job(fun='sip.get_peers', args=self.server.id, res_notify_uid=self.env.uid)
-        else:
-            raise ValidationError('SIP peers generation not enabled!')
+        self.env['asterisk_plus.settings'].asterisk_plus_notify('Enterprise Feature')
+
 
 

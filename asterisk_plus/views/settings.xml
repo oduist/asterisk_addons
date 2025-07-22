@@ -45,11 +45,11 @@
                 <page name="calls" string="Calls"
                       invisible="is_registered == False">
                   <group>
-                      <group string="Call Options" name="options">
-                        <field name="auto_create_partners"/>
-                        <field name="calls_keep_days"/>
-                        <field name="number_search_operation"/>
-                        <field name="disable_phone_format"/>
+                      <group string="Call Options" name="options" >
+                        <field name="auto_create_partners" readonly="1" help="Enterprise Feature"/>
+                        <field name="calls_keep_days" readonly="1" help="Enterprise Feature"/>
+                        <field name="number_search_operation" readonly="1" help="Enterprise Feature"/>
+                        <field name="disable_phone_format" readonly="1" help="Enterprise Feature"/>
                       </group>
                       <group string="Call Recording">
                         <field name="record_calls"/>
@@ -71,20 +71,19 @@
                                invisible="recordings_access != 's3'"
                                required="recordings_access == 's3'"/>
                         <!-- End of S3 -->
-                        <field name="recordings_keep_days"/>
-                        <field name="use_mp3_encoder"
+                        <field name="recordings_keep_days" readonly="1" help="Enterprise Feature"/>
+                        <field name="use_mp3_encoder" help="Enterprise Feature" readonly="1"
                                invisible="record_calls == False"/>
-                        <field name="mp3_encoder_bitrate"
+                        <field name="mp3_encoder_bitrate" help="Enterprise Feature" readonly="1"
                                invisible="record_calls == False or use_mp3_encoder == False" required="use_mp3_encoder == True"/>
-                        <field name="mp3_encoder_quality"
+                        <field name="mp3_encoder_quality" help="Enterprise Feature" readonly="1"
                                invisible="record_calls == False or use_mp3_encoder == False" required="use_mp3_encoder == True"/>
                         <label for="recording_storage" string="Recording Storage"
                                invisible="record_calls == False or recordings_access not in ['local','remote']"/>
                           <div class="d-flex">
-                            <field name="recording_storage" class="w-50"
+                            <field name="recording_storage" class="w-50" help="Enterprise Feature" readonly="1"
                                    invisible="record_calls == False or recordings_access not in ['local','remote']" />
-                            <button type="object" name="sync_recording_storage" string="Move storage" icon="fa-refresh" help="Use this button after changing the storage type."
-                                    invisible="record_calls == False or recordings_access not in ['local','remote']"/>
+
                           </div>
                       </group>
                     </group>
@@ -103,9 +102,9 @@
                       <field name="remove_recording_after_transcript"
                              invisible="transcribe_calls == False"/>
                     </group>
-                    <group string="Transcription Rules"
+                    <group string="Transcription Rules" help="Enterprise Feature"
                            invisible="transcribe_calls == False">
-                      <field name="transcription_rules">
+                      <field name="transcription_rules" readonly="1" help="Enterprise Feature">
                         <tree editable="bottom">
                           <field name="id"/>
                           <field name="calling_number"/>

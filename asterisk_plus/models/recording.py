@@ -167,13 +167,8 @@ class Recording(models.Model):
         for rec in recording_channel_data:
             self.save_call_recording(call, rec)
 
-    @api.model
-    def save_call_recording(self, call, recording_channel_data):
-        recording_file_path = recording_channel_data.value
-        debug(self, 'Call %s getting recording from %s' % (
-            call.id, recording_file_path))
-        # Get recording access settings.
-        kwargs = {
+    def get_all_recording_data(self, call):
+        return {
             'recordings_access': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access'),
             'recordings_access_url': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access_url'),
             'recordings_s3_region': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_region'),
@@ -181,14 +176,14 @@ class Recording(models.Model):
             'recordings_s3_key': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_key'),
             'recordings_s3_secret': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_secret'),
         }
-        mp3_encode = self.env['asterisk_plus.settings'].sudo().get_param(
-            'use_mp3_encoder')
-        if mp3_encode:
-            kwargs['file_format'] = 'mp3'
-            kwargs['mp3_bitrate'] = int(self.env['asterisk_plus.settings'].sudo().get_param(
-                'mp3_encoder_bitrate', default='96'))
-            kwargs['mp3_quality'] = int(self.env['asterisk_plus.settings'].sudo().get_param(
-                'mp3_encoder_quality', default=4))
+
+    @api.model
+    def save_call_recording(self, call, recording_channel_data):
+        recording_file_path = recording_channel_data.value
+        debug(self, 'Call %s getting recording from %s' % (
+            call.id, recording_file_path))
+        # Get recording access settings.
+        kwargs = self.get_all_recording_data(call)
         call.server.local_job(
             fun='recording.get_file',
             args=recording_file_path,
@@ -353,10 +348,6 @@ class Recording(models.Model):
                 return
             else:
                 raise ValidationError('OpenAI API key is not set!')
-        # First check if the call matches the transcription rules.
-        if fail_silently and not self.env['asterisk_plus.transcription_rule'].sudo().check_rules(
-                self.calling_number, self.called_number):
-            return False
         # We passed the rules, let's do the transcription!
         try:
             data = {
