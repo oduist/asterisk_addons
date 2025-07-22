@@ -73,10 +73,10 @@
                   <page name="settings" string="SIP Users">
                     <group>
                       <group>
-                        <field name="auto_create_pbx_users"/>
+                        <field name="auto_create_pbx_users" readonly="1" help="Enterprise Feature"/>
                         <field name="sip_peer_start_exten"
                                attrs="{'invisible': [('auto_create_pbx_users', '=', False)]}"/>
-                        <field name="generate_sip_peers"/>
+                        <field name="generate_sip_peers" readonly="1" help="Enterprise Feature"/>
                         <field name="sip_peer_transport"
                                attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
                         <field name="sip_protocol"

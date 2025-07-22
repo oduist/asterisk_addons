@@ -5,7 +5,7 @@
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'author': 'Oduist',
     'price': 0,
-    'version': '4.0.1',
+    'version': '4.2.0',
     'currency': 'EUR',
     'maintainer': 'Oduist',
     'support': 'support@oduist.com',

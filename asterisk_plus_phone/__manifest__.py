@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Web SIP Phone (WebRTC) for Asterisk Plus module",
+    'name': "Web SIP Phone (WebRTC) for Asterisk Plus",
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'description': """Make and receive calls from Odoo.""",
     'currency': 'EUR',

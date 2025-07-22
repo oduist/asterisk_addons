@@ -10,6 +10,7 @@ import unicodedata
 import urllib
 import urllib3
 import sys
+
 if sys.version_info[0] > 2:
     from urllib.parse import urljoin
 else:
@@ -21,10 +22,9 @@ from odoo.exceptions import ValidationError, UserError
 from .settings import debug
 from .res_partner import strip_number, format_number
 
-
 logger = logging.getLogger(__name__)
 
-DEFAULT_SIP_TEMPLATES="""
+DEFAULT_SIP_TEMPLATES = """
 [trunk_defaults](!)
 type = wizard
 transport = transport-udp
@@ -121,18 +121,19 @@ aor/minimum_expiration = 30
 aor/support_path = yes
 """
 
-DEFAULT_SIP_TEMPLATE="""[{username}]({template})
+DEFAULT_SIP_TEMPLATE = """[{username}]({template})
 inbound_auth/username = {username}
 inbound_auth/password = {password}
 endpoint/callerid = {callerid}
 hint_exten = {exten}
 """
 
-SIP_TRANSPORT_SELECTION =[
+SIP_TRANSPORT_SELECTION = [
     ('webrtc-user', 'WebRTC'),
     ('udp-user', 'UDP'),
     ('tcp-user', 'TCP')
 ]
+
 
 def get_default_server(rec):
     try:
@@ -166,15 +167,15 @@ class Server(models.Model):
     agent_initialized = fields.Boolean()
     permit_agent_initialization = fields.Boolean(string='Permit Initialization', default=True)
     auto_create_pbx_users = fields.Boolean(string="Autocreate PBX Users",
-        help="Automatically generate PBX users for Odoo users")
+                                           help="Automatically generate PBX users for Odoo users")
     generate_sip_peers = fields.Boolean(string='Generate SIP peers',
-        help="""Enable get_sip_conf controller.
+                                        help="""Enable get_sip_conf controller.
         It generates part of Asterisk SIP config file according to SIP Conf Template
         for each channel of every PBX User.""")
     sip_peer_transport = fields.Selection(string='SIP template name',
-        selection=SIP_TRANSPORT_SELECTION,
-        help='Configuration template name which is applied to the peer by default, e.g. [name](template)',
-        required=True, default='udp-user')
+                                          selection=SIP_TRANSPORT_SELECTION,
+                                          help='Configuration template name which is applied to the peer by default, e.g. [name](template)',
+                                          required=True, default='udp-user')
     sip_peer_template = fields.Text(
         string="SIP Peer Template",
         help="SIP configuration template for PBX users",
@@ -182,7 +183,7 @@ class Server(models.Model):
     sip_templates = fields.Text(string='SIP Templates', required=True, default=DEFAULT_SIP_TEMPLATES)
     security_token = fields.Char(required=False, default=lambda x: uuid.uuid4())
     sip_protocol = fields.Selection(string='SIP protocol',
-        selection=[('SIP', 'SIP'), ('PJSIP', 'PJSIP')], default='PJSIP', required=True)
+                                    selection=[('SIP', 'SIP'), ('PJSIP', 'PJSIP')], default='PJSIP', required=True)
     sip_peer_start_exten = fields.Char('Starting Exten', default='201')
     # Agent options
     ami_host = fields.Char('AMI Host', required=True, default='localhost')
@@ -203,9 +204,6 @@ class Server(models.Model):
         if agent_url:
             vals.update({'agent_url': agent_url.replace('http://', 'https://')})
         res = super().write(vals)
-        autocreate_enabled = vals.get('auto_create_pbx_users', False)
-        if autocreate_enabled:
-            self.run_auto_create_pbx_users()
         return res
 
     @api.constrains('agent_initialized')
@@ -214,34 +212,8 @@ class Server(models.Model):
             if not rec.agent_initialized and not rec.permit_agent_initialization:
                 raise ValidationError('Permit Agent initialization first!')
 
-    @api.model
-    def run_auto_create_pbx_users(self):
-        debug(self, 'Run autocreate PBX users')
-        users = self.env['res.users'].search([]).filtered(
-            lambda x: x.has_group('asterisk_plus.group_asterisk_user'))
-        self.env['asterisk_plus.user'].auto_create(users)
-
     def get_sip_peers(self):
-        if not self.generate_sip_peers:
-            logger.info('SIP peers generation is not enabled.')
-            return False
-
-        sip_content = '{}\n'.format(self.sip_templates)
-        for channel in self.env['asterisk_plus.user_channel'].sudo().search(
-                [('server', '=', self.id)]):
-            if not channel.sip_password:
-                logger.info('SIP channel %s has not password, not including.', channel.name)
-                continue
-            user_name = unicodedata.normalize('NFKD', channel.user.name).encode('ASCII', 'ignore').decode('ASCII')
-            sip_content += self.sip_peer_template.format(
-                template=channel.sip_transport,
-                password=channel.sip_password,
-                username=channel.sip_user,
-                exten=channel.asterisk_user.exten,
-                callerid='{} <{}>'.format(user_name, channel.asterisk_user.callerid_number)
-            )
-            sip_content += '\n\n'
-        return sip_content
+        logger.info('Generate sip peers! [REQUIRED ENTERPRISE]')
 
     def _get_market_download_link(self):
         for rec in self:
@@ -298,7 +270,7 @@ class Server(models.Model):
         self.ensure_one()
         try:
             self.local_job(fun='test.ping', res_notify_uid=self.env.user.id,
-                res_notify_title='Async', timeout=5)
+                           res_notify_title='Async', timeout=5)
         except Exception as e:
             raise ValidationError(str(e))
 
@@ -306,7 +278,7 @@ class Server(models.Model):
         self.ensure_one()
         try:
             self.local_job(fun='agent.reload_config', res_notify_uid=self.env.user.id,
-                res_notify_title='Reload Config', timeout=5)
+                           res_notify_title='Reload Config', timeout=5)
         except Exception as e:
             raise ValidationError(str(e))
 
@@ -342,7 +314,7 @@ class Server(models.Model):
         if not user:
             user = self.env.user
         if not user.asterisk_users:
-            raise ValidationError('PBX User is not defined!') # sdd sd sd sd sdsd sdsd s
+            raise ValidationError('PBX User is not defined!')  # sdd sd sd sd sdsd sdsd s
         # Format number
         if model and res_id:
             obj = self.env[model].browse(res_id)
@@ -358,7 +330,7 @@ class Server(models.Model):
             callerid_name = ''
         # Get originate timeout
         originate_timeout = float(self.env[
-            'asterisk_plus.settings'].sudo().get_param('originate_timeout'))
+                                      'asterisk_plus.settings'].sudo().get_param('originate_timeout'))
 
         for asterisk_user in self.env.user.asterisk_users:
             if not asterisk_user.channels:
@@ -374,7 +346,7 @@ class Server(models.Model):
                     try:
                         pos = header.find(':')
                         param = header[:pos]
-                        val = header[pos+1:]
+                        val = header[pos + 1:]
                         if 'PJSIP' in ch.name.upper():
                             channel_vars.append(
                                 'PJSIP_HEADER(add,{})={}'.format(
@@ -411,13 +383,13 @@ class Server(models.Model):
                     call_data['partner'] = res_id
                 call = self.env['asterisk_plus.call'].create(call_data)
                 self.env['asterisk_plus.channel'].create({
-                        'server': asterisk_user.server.id,
-                        'user': self.env.user.id,
-                        'call': call.id,
-                        'channel': ch.name,
-                        'uniqueid': channel_id,
-                        'linkedid': other_channel_id,
-                        'is_active': True,
+                    'server': asterisk_user.server.id,
+                    'user': self.env.user.id,
+                    'call': call.id,
+                    'channel': ch.name,
+                    'uniqueid': channel_id,
+                    'linkedid': other_channel_id,
+                    'is_active': True,
                 })
                 if not self.env.context.get('no_commit'):
                     self.env.cr.commit()
@@ -456,6 +428,7 @@ class Server(models.Model):
                     notify_uid=notify_uid,
                     warning=True)
                 return True
+
         if isinstance(data, dict):
             _check_error_response(data)
         elif isinstance(data, list):
@@ -487,12 +460,12 @@ class Server(models.Model):
         # Iterate over PBX users.
         pbx_users = self.env['asterisk_plus.user'].search([])
         for user in pbx_users:
-            res.append('{} => 36463737351,{},{}'.format(user.exten, user.user.name,user.user.email))
+            res.append('{} => 36463737351,{},{}'.format(user.exten, user.user.name, user.user.email))
         return '\n'.join(res)
 
     @api.constrains('sip_templates')
     def _check_template_names(self):
         for rec in self:
             if not all(['[udp-user]' in rec.sip_templates,
-                    '[tcp-user]' in rec.sip_templates, '[webrtc-user]' in rec.sip_templates]):
+                        '[tcp-user]' in rec.sip_templates, '[webrtc-user]' in rec.sip_templates]):
                 raise ValidationError('Template must contains [udp-user], [tcp-user], [webrtc-user]!')
