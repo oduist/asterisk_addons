@@ -189,14 +189,6 @@ class Channel(models.Model):
             partner_id = channel.env['res.partner'].get_partner_by_number(
                 channel.exten, country=country)['id']
             debug(self, 'Partner %s from exten %s' % (partner_id, channel.exten))
-        # Check if auto create partners is set & create partner.
-        if channel.call.direction == 'in' and not partner_id and channel.env['asterisk_plus.settings'].get_param('auto_create_partners'):
-            partner_number = channel.exten if channel.call.direction == 'out' else channel.callerid_num
-            partner_id = channel.env['res.partner'].with_context(tracking_disable=True).sudo().create({
-                'name': partner_number,
-                'phone': partner_number,
-            }).id
-            debug(channel, 'Call {} auto create partner id {}'.format(channel.call.id, partner_id))
         if partner_id:
             debug(self, 'Setting partner %s for call %s' % (partner_id, channel.call.id))
             channel.call.partner = partner_id

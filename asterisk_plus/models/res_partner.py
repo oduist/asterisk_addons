@@ -133,8 +133,6 @@ class Partner(models.Model):
         """Keep normalized phone numbers in normalized fields.
         """
         self.ensure_one()
-        if self.env['asterisk_plus.settings'].sudo().get_param('disable_phone_format'):
-            return number
         country = self._get_country()
         try:
             phone_nbr = phonenumbers.parse(number, country)
@@ -150,16 +148,16 @@ class Partner(models.Model):
         # Strip the number if parse error.
         return number
 
-    def search_by_number(self, number):
+    def search_by_number(self, number, search_operation='='):
         """Search partner by number.
         Args:
             number (str): number to be searched on.
+            search_operation (str): default: '=', values: ['=', 'ilike'].
         If several partners are found by the same number:
         a) If partners belong to same company, return company record.
         b) If partners belong to different companies return False.
         """
-        search_operation = self.env['asterisk_plus.settings'].sudo(
-            ).get_param('number_search_operation')
+
         found = self.search([
             '|',
             ('phone_normalized', search_operation, number),
@@ -249,9 +247,6 @@ class Partner(models.Model):
                     [('partner', '=', rec.id)])
 
     def _phone_format(self, number=None, country=None, company=None, force_format='E164', **kwargs):
-        disable = self.env['asterisk_plus.settings'].sudo().get_param('disable_phone_format')
-        if disable:
-            return strip_number(number)
         version_info = release.version_info
         # For Odoo versions before 16
         if version_info[0] < 16:
