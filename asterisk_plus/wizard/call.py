@@ -67,6 +67,4 @@ class CallsWizard(models.TransientModel):
                 'status': self.call_status,
                 }
         }
-        return self.env.ref(
-            'asterisk_plus.calls_report_action').report_action(self,
-                                                                data=data)
+        return self.env.ref('asterisk_plus.calls_report_action').report_action(self, data=data)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, release
 from odoo.exceptions import ValidationError
 from odoo.addons.asterisk_plus.models.user import USER_PERMITTED_FIELDS
 
@@ -32,7 +32,7 @@ class User(models.Model):
 
     @api.model
     def get_param(self, param, default=False):
-        self.check_access_rule("read")
+        self.check_access_rule('read') if release.version_info[0] < 18 else self.check_access('read')
         data = self.search([])
         if not data:
             data = self.sudo().with_context(no_constrains=True).create({})
