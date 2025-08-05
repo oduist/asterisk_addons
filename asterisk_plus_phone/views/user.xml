@@ -6,11 +6,11 @@
         <field name="inherit_id" ref="asterisk_plus.asterisk_plus_user_form"/>
         <field name="arch" type="xml">
             <field name="sip_password" position="attributes">
-                <attribute name="column_invisible">False</attribute>
+                <attribute name="attrs">{'column_invisible':  False}</attribute>
             </field>
 
             <field name="sip_transport" position="attributes">
-                <attribute name="column_invisible">False</attribute>
+                <attribute name="attrs">{'column_invisible':  False}</attribute>
             </field>
             <field name="sip_password" position="before">
                 <field name="sip_auth_user" groups="asterisk_plus.group_asterisk_admin"

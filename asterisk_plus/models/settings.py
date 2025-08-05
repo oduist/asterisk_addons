@@ -162,7 +162,7 @@ class Settings(models.Model):
     transcription_rules = fields.One2many('asterisk_plus.transcription_rule', 'settings')
     summary_prompt = fields.Text(required=True, default='Summarise this phone call')
     completion_model = fields.Char(required=True, default='gpt-4o')
-    register_summary = fields.Boolean(help='Register summary at partner of reference chat.')
+    register_summary = fields.Boolean(help='Register summary at partner of reference chat.', default=True)
     remove_recording_after_transcript = fields.Boolean()
     #############  REGISTRATION FIELDS   ###############################################
     instance_uid = fields.Char('Instance UID', compute='_get_instance_data')
