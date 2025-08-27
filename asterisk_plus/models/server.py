@@ -347,6 +347,8 @@ class Server(models.Model):
                         pos = header.find(':')
                         param = header[:pos]
                         val = header[pos + 1:]
+                        # Add special variable for Local originate.
+                        channel_vars.append('AUTO_ANSWER={}'.format(ch.auto_answer_header))
                         if 'PJSIP' in ch.name.upper():
                             channel_vars.append(
                                 'PJSIP_HEADER(add,{})={}'.format(
@@ -398,7 +400,8 @@ class Server(models.Model):
                     'Context': ch.originate_context,
                     'Priority': '1',
                     'Timeout': 1000 * originate_timeout,
-                    'Channel': ch.name,
+                    'Channel': 'Local/{}@{}'.format(asterisk_user.exten, 'from-originate'),
+                    #'Channel': ch.name,
                     'Exten': number,
                     'Async': 'true',
                     'EarlyMedia': 'true',
@@ -407,6 +410,7 @@ class Server(models.Model):
                     'OtherChannelId': other_channel_id,
                     'Variable': channel_vars,
                 }
+                print(channel_vars)
                 ch.server.ami_action(action, res_model='asterisk_plus.server',
                                      res_method='originate_call_response',
                                      pass_back={'notify_uid': self.env.user.id,
