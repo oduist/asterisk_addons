@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id='asterisk_calls_project_action' model='ir.actions.act_window'>
+        <field name='name'>Calls</field>
+        <field name='res_model'>asterisk_plus.call</field>
+        <field name='view_mode'>list,form</field>
+        <field name="domain">[('model','=', 'project.project'), ('res_id', '=', active_id)]</field>
+    </record>
+
+    <!-- Projects form view -->
+    <record id="view_project_form" model="ir.ui.view">
+        <field name="name">asterisk_calls.project.form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <page name="description" position="after">
+                <page string="Recorded Calls" name="recordings">
+                    <group>
+                        <field name="recorded_calls" nolabel="1">
+                            <list limit="5">
+                                <field name="recording_widget" widget="html"/>
+                                <field name="duration_human"/>
+                                <field name="answered"/>
+                                <field name="calling_user"/>
+                                <field name="answered_user"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </page>
+            <field name="partner_id" position="after">
+                <field name="partner_phone" widget="phone" class="d-flex flex-row"
+                       invisible="partner_id == False or partner_phone == False"/>
+            </field>
+            <field name="partner_id" position="after">
+                <field name="partner_mobile" widget="phone"
+                       invisible="partner_id == False or partner_mobile == False"/>
+            </field>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(asterisk_calls_project_action)d" type="action" class="oe_stat_button" icon="fa-phone">
+                    <field name="asterisk_calls_count" string="Calls" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="search_project_calls" model="ir.ui.view">
+        <field name="name">asterisk_calls.project.search</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="partner_phone"/>
+                <field name="partner_mobile"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

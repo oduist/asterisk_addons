@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="connect.active_calls_popup" t-inherit-mode="extension">
+        <xpath expr="//th[hasclass('partner-th')]" position="after">
+            <th>Lead</th>
+        </xpath>
+        <xpath expr="//td[hasclass('partner-td')]" position="after">
+            <td t-on-click="(ev) => this._onClickLead(ev, call.lead)" t-attf-title="{{call.lead ? call.lead[1] : ''}}"><t t-if="call.lead" t-out="call.lead[1]"/></td>
+        </xpath>
+    </t>
+
+</templates>

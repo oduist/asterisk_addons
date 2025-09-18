@@ -1,0 +1,44 @@
+<odoo>
+    <record id="asterisk_plus_server_project_create_access" model="ir.model.access">
+        <field name="name">asterisk_plus_server_project_create_access</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="project.model_project_project"/>
+        <field name="group_id" ref="asterisk_plus.group_asterisk_server"/>
+    </record>
+
+    <record id="asterisk_plus_server_task_create_access" model="ir.model.access">
+        <field name="name">asterisk_plus_server_task_create_access</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="group_id" ref="asterisk_plus.group_asterisk_server"/>
+    </record>
+
+    <!-- RECORD RULES TO ACCESS ALL RECORDS -->
+    <record id="server_project_records_rule" model="ir.rule">
+        <field name="name">server_project_records_rule</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="project.model_project_project"/>
+        <field name="groups" eval="[(4, ref('asterisk_plus.group_asterisk_server'))]"/>
+        <field name="domain_force">[(1,'=', 1)]</field>
+    </record>    
+
+    <record id="server_task_records_rule" model="ir.rule">
+        <field name="name">server_task_records_rule</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="groups" eval="[(4, ref('asterisk_plus.group_asterisk_server'))]"/>
+        <field name="domain_force">[(1,'=', 1)]</field>
+    </record>    
+</odoo>

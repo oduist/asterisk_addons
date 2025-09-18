@@ -1,0 +1,14 @@
+<odoo>
+  
+    <!-- Callgroup -->
+    <record id="asterisk_callgroup_server" model="ir.model.access">
+      <field name="name">asterisk_callgroup_server</field>
+      <field name="model_id" ref="asterisk_plus_callgroup.model_asterisk_plus_callgroup"/>
+      <field name="group_id" ref="asterisk_plus.group_asterisk_server"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+  
+  </odoo>

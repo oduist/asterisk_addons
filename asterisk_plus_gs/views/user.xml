@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="asterisk_plus_gs_user_form" model="ir.ui.view">
+    <field name="name">asterisk_plus_gs_user_form</field>
+    <field name="model">asterisk_plus.user</field>
+    <field name="inherit_id" ref="asterisk_plus.asterisk_plus_user_form"/>
+    <field name="arch" type="xml">        
+        <field name="originate_context" position="replace"/>
+    </field>
+  </record>
+</odoo>
