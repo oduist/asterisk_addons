@@ -106,7 +106,6 @@ export class Calls extends Component {
             item.started = `${item.started.split(' ')[0]} ${local_time}`
         }
         this.state.calls = records
-        console.log(records)
     }
 
     async _getFavorites() {
