@@ -1,0 +1,13 @@
+<odoo>
+  <template id="s_talk_button_snippet" name="Talk Button">
+    <div class="s_card card bg-white w-100" style="border: none;">
+      <t t-call="asterisk_plus_website.talk_button_base"/>
+    </div>
+  </template>
+
+  <template id="place_into_bar" inherit_id="website.snippets" priority="8" name="Place into bar">
+    <xpath expr="//div[@id='snippet_content']//t[@t-snippet][last()]" position="after">
+      <t t-snippet="asterisk_plus_website.s_talk_button_snippet" t-thumbnail="/asterisk_plus_website/static/src/img/talk_button.png"/>
+    </xpath>
+  </template>
+</odoo>
