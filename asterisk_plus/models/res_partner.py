@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 import logging
 import re
 import phonenumbers
 from phonenumbers import phonenumberutil
-from odoo import models, fields, api, tools, release
+from odoo import models, fields, api, tools, release, _
 from .settings import debug, MAX_EXTEN_LEN
 
 logger = logging.getLogger(__name__)
@@ -56,26 +56,25 @@ class Partner(models.Model):
     mobile_normalized = fields.Char(compute='_get_phone_normalized',
                                     index=True, store=True,
                                     string='E.164 mobile')
-    phone_extension = fields.Char(help=(
+    phone_extension = fields.Char(help=_(
         'Prefix with # to add 1 second pause before entering. '
         'Every # adds 1 second pause. Example: ###1001'))
     call_count = fields.Integer(compute='_get_call_count', string='Calls')
     recorded_calls = fields.One2many('asterisk_plus.recording', 'partner')
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            try:
-                if self.env.context.get('call_id'):
-                    call = self.env['asterisk_plus.call'].browse(
-                        self.env.context['call_id'])
-                    if call.direction == 'in':
-                        vals['phone'] = call.calling_number
-                    else:
-                        vals['phone'] = call.called_number
-            except Exception as e:
-                logger.exception(e)
-        res = super().create(vals_list)
+    @api.model
+    def create(self, vals):
+        try:
+            if self.env.context.get('call_id'):
+                call = self.env['asterisk_plus.call'].browse(
+                    self.env.context['call_id'])
+                if call.direction == 'in':
+                    vals['phone'] = call.calling_number
+                else:
+                    vals['phone'] = call.called_number
+        except Exception as e:
+            logger.exception(e)
+        res = super().create(vals)
         if res and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
                 self.env.registry.clear_cache()
@@ -133,6 +132,8 @@ class Partner(models.Model):
         """Keep normalized phone numbers in normalized fields.
         """
         self.ensure_one()
+        if self.env['asterisk_plus.settings'].sudo().get_param('disable_phone_format'):
+            return number
         country = self._get_country()
         try:
             phone_nbr = phonenumbers.parse(number, country)
@@ -148,16 +149,16 @@ class Partner(models.Model):
         # Strip the number if parse error.
         return number
 
-    def search_by_number(self, number, search_operation='='):
+    def search_by_number(self, number):
         """Search partner by number.
         Args:
             number (str): number to be searched on.
-            search_operation (str): default: '=', values: ['=', 'ilike'].
         If several partners are found by the same number:
         a) If partners belong to same company, return company record.
         b) If partners belong to different companies return False.
         """
-
+        search_operation = self.env['asterisk_plus.settings'].sudo(
+            ).get_param('number_search_operation')
         found = self.search([
             '|',
             ('phone_normalized', search_operation, number),
@@ -213,7 +214,7 @@ class Partner(models.Model):
         if (not number or 'unknown' in number or
                 number == 's'):
             debug(self, '{} skip search'.format(number))
-            return {'name': 'Unknown', 'id': False}
+            return {'name': _('Unknown'), 'id': False}
         partner = None
         # Search by stripped number prefixed with '+'
         number_plus = '+' + number
@@ -232,7 +233,7 @@ class Partner(models.Model):
         if partner:
             return {'id': partner.id, 'name': partner.display_name }
         else:
-            return {'name': 'Unknown', 'id': False}
+            return {'name': _('Unknown'), 'id': False}
 
     def _get_call_count(self):
         for rec in self:
@@ -247,6 +248,9 @@ class Partner(models.Model):
                     [('partner', '=', rec.id)])
 
     def _phone_format(self, number=None, country=None, company=None, force_format='E164', **kwargs):
+        disable = self.env['asterisk_plus.settings'].sudo().get_param('disable_phone_format')
+        if disable:
+            return strip_number(number)
         version_info = release.version_info
         # For Odoo versions before 16
         if version_info[0] < 16:

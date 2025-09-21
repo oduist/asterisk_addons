@@ -16,17 +16,7 @@
             <field name="value">44574</field>
             <field name="server" ref="asterisk_plus.default_server"/>
         </record>
-        <!-- Agent RPC port -->
-        <record id="local_rpc_listen" model="asterisk_plus.agent_options">
-            <field name="key">local_rpc_listen</field>
-            <field name="value">0.0.0.0</field>
-            <field name="server" ref="asterisk_plus.default_server"/>
-        </record>
-        <record id="local_rpc_port" model="asterisk_plus.agent_options">
-            <field name="key">local_rpc_port</field>
-            <field name="value">48000</field>
-            <field name="server" ref="asterisk_plus.default_server"/>
-        </record>
+
         <!-- Security Settings -->
         <record id="security_enabled" model="asterisk_plus.agent_options">
             <field name="key">security_enabled</field>
@@ -68,7 +58,7 @@
             <field name="value">iptables</field>
             <field name="server" ref="asterisk_plus.default_server"/>
         </record>
-
+        
         <record id="asterisk_sounds_dir" model="asterisk_plus.agent_options">
             <field name="key">asterisk_sounds_dir</field>
             <field name="value">/var/lib/asterisk/sounds/</field>

@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 import json
 import logging
 import uuid
 from odoo import http, SUPERUSER_ID, registry, release
 from odoo.api import Environment
 from werkzeug.exceptions import BadRequest, NotFound
-from odoo.modules.registry import Registry
-
-if release.version_info[0] > 17:
-    registry = Registry
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +159,7 @@ class AsteriskPlusController(http.Controller):
 
     @http.route('/asterisk_plus/ping', type='http', auth='none')
     def asterisk_ping(self, **kwargs):
-        dbname = kwargs.get('dbname', '_15')
+        dbname = kwargs.get('dbname', 'odoopbx_15')
         with registry(dbname).cursor() as cr:
             env = Environment(cr, SUPERUSER_ID, {})
             try:
@@ -194,15 +190,31 @@ class AsteriskPlusController(http.Controller):
         if not email:
             return http.request.render('asterisk_plus.email_not_set')
         mail = http.request.env['mail.mail'].create({
-            'subject': 'Asterisk Plus subscribe request',
+            'subject': 'Asterisk calls subscribe request',
             'email_from': email,
-            'email_to': 'team@oduist.com',
+            'email_to': 'odooist@gmail.com',
             'body_html': '<p>Email: {}</p>'.format(email),
             'body': 'Email: {}'.format(email),
         })
         mail.send()
         return http.request.render('asterisk_plus.email_sent',
                                    qcontext={'email': email})
+
+    @http.route('/%s/transcript/<int:rec_id>' % MODULE_NAME, methods=['POST'], type='json',
+                auth='public', csrf=False)
+    def upload_transcript(self, rec_id):
+        # Public method protected by the one-time transcription token.
+        data = json.loads(http.request.httprequest.get_data(as_text=True))
+        rec = http.request.env['%s.recording' % MODULE_NAME].sudo().search([
+            ('id', '=', rec_id), ('transcription_token', '!=', False),
+            ('transcription_token', '=', data['transcription_token'])
+        ])
+        if not rec:
+            logger.warning('Transcription token %s not found for recording %s',
+                data['transcription_token'], rec_id)
+            return error_response('Bad taken')
+        rec.update_transcript(data)        
+        return True
 
     @http.route('/asterisk_plus/agent', type='http', auth='none')
     def init_agent(self, **kw):
@@ -220,8 +232,6 @@ class AsteriskPlusController(http.Controller):
         else:
             try:
                 env = http.request.env
-                if not env:
-                    raise Exception('request not bound to a database')
                 return self._initialize_server(env)
             except Exception as e:
                 if 'request not bound to a database' in str(e):
@@ -236,22 +246,20 @@ class AsteriskPlusController(http.Controller):
             return error_response('Agent is already initialized.')
         if not server.permit_agent_initialization:
             return error_response('Agent initialization is not permitted!')
-        # Close init and set token
-        agent_token = str(uuid.uuid4())
-        odoo_password = str(uuid.uuid4())
-        # Set Odoo password
-        server.user.password = odoo_password
-        # Get connection data and pass to the agent
+        # Check subscription
+        is_subscribed = env['asterisk_plus.settings'].sudo().get_param('is_subscribed')
+        is_registered = env['asterisk_plus.settings'].sudo().get_param('is_registered')
+        if not is_registered or not is_subscribed:
+            return error_response('Please register and subscribe from the Odoo first!')
+        # Get API URL and key and pass to the agent
         data = {
-            'agent_token': agent_token,
-            'odoo_user': server.user.login,
-            'odoo_password': odoo_password,
-            'odoo_db': env.cr.dbname,
+            'api_url': env['asterisk_plus.settings'].sudo().get_param('api_url'),
+            'api_key': env['asterisk_plus.settings'].sudo().get_param('api_key'),
+            'instance_uid': env['asterisk_plus.settings'].sudo().get_param('instance_uid'),
         }
         server.write({
             'agent_initialized': True,
             'permit_agent_initialization': False,
-            'agent_token': agent_token,
         })
         # Set initialized flag to disable future requests.
         logger.info('Agent initialization complete.')
@@ -368,7 +376,7 @@ class AsteriskPlusController(http.Controller):
         if not server:
             logger.error('Server not found by token!')
             return ''
-
+        
         user_channel = http.request.env['asterisk_plus.user_channel'].sudo().search(
             [('name', '=', req_channel)])
         if not user_channel:

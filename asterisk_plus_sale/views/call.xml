@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sale_order_call_search" model="ir.ui.view">
+        <field name="name">view_sale_order_call_search</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_search"/>
+        <field name="arch" type="xml">
+            <filter name="out" position="after">
+                <separator/>
+                <filter name="sale_order" string="Sale Order" domain="[('model', '=', 'sale.order')]"/>
+            </filter>
+        </field>
+    </record>
+
+</odoo>

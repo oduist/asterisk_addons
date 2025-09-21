@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
-from odoo import models, fields, api
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2021
+from odoo import models, fields, api, _
 
 
 class Tag(models.Model):
@@ -12,15 +12,16 @@ class Tag(models.Model):
     recordings = fields.Many2many('asterisk_plus.recording',
                                   relation='asterisk_plus_recording_tag',
                                   column1='recording', column2='tag')
-    recording_count = fields.Integer(compute='_get_recording_count')
+    recording_count = fields.Integer(compute='_get_recording_count',
+                                string=_('Recordings'))
 
     _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'The name must be unique!'),
+        ('name_uniq', 'unique (name)', _('The name must be unique!')),
     ]
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(Tag, self).create(vals_list)
+    @api.model
+    def create(self, vals):
+        res = super(Tag, self).create(vals)
         return res
 
     def _get_recording_count(self):

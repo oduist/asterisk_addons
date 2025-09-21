@@ -5,7 +5,9 @@
             <field name="name">Vacuum PBX debug</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="model_id" ref="model_asterisk_plus_debug"/>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="model_asterisk_plus_debug"></field>
             <field name="code">model.vacuum(hours=24)</field>
             <field name="state">code</field>
         </record>
@@ -14,7 +16,9 @@
             <field name="name">Vacuum channels</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="model_id" ref="model_asterisk_plus_channel"/>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="model_asterisk_plus_channel"></field>
             <field name="code">model.vacuum(hours=24)</field>
             <field name="state">code</field>
         </record>
@@ -23,7 +27,9 @@
             <field name="name">Vacuum channel data</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
-            <field name="model_id" ref="model_asterisk_plus_channel_data"/>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="model_asterisk_plus_channel_data"></field>
             <field name="code">model.vacuum(hours=24)</field>
             <field name="state">code</field>
         </record>
@@ -32,6 +38,8 @@
             <field name="name">Asterisk delete expired calls</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
             <field name="model_id" ref="model_asterisk_plus_call"/>
             <field name="code">model.delete_calls()</field>
             <field name="state">code</field>
@@ -43,6 +51,8 @@
             <field name="name">Asterisk cleanup active calls</field>
             <field name="interval_number">1</field>
             <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
             <field name="model_id" ref="model_asterisk_plus_call"/>
             <field name="code">model.cleanup_active_calls()</field>
             <field name="state">code</field>
@@ -54,6 +64,8 @@
             <field name="name">Asterisk delete expired recordings</field>
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
             <field name="model_id" ref="model_asterisk_plus_recording"/>
             <field name="code">model.delete_recordings()</field>
             <field name="state">code</field>

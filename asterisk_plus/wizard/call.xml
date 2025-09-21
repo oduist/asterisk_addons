@@ -27,8 +27,8 @@
                     <group string="Fields" col="8">
                         <field name="src"/>
                         <field name="dst"/>
-                        <field name="src_user" string="From User"/>
-                        <field name="dst_user" string="To User"/>
+                        <field name="src_user"/>
+                        <field name="dst_user"/>
                         <field name="partner"/>
                         <field name="clid"/>
                         <field name="started"/>
@@ -38,18 +38,20 @@
                     </group>
                 </sheet>
                 <footer>
-                    <button name="cancel" special="cancel" string="Cancel" class="oe_link"/>
-                </footer>
+                    <button name="submit" string="Submit" colspan="1"
+                            type="object" default_focus="1" class="oe_highlight"/>
+                    <button special="cancel" string="Cancel" class="oe_link"/>
+                </footer>                
             </form>
         </field>
     </record>
 
     <record model="ir.actions.act_window" id="call_wizard_action">
-        <field name="name">Calls Report (Enterprise Feature)</field>
+        <field name="name">Calls Report</field>
         <field name="view_mode">form</field>
         <field name="res_model">asterisk_plus.call_wizard</field>
         <field name="target">new</field>
-        <field name="view_id" ref="call_wizard_form"/>
+        <field name="view_id" ref="call_wizard_form"/>        
     </record>
 
     <menuitem name="Calls" id="call_wizard_menu"

@@ -1,21 +1,21 @@
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 # -*- encoding: utf-8 -*-
 {
     'name': 'Asterisk Plus',
-    'live_test_url': 'https://pbx-demo-18.oduist.com/',
-    'author': 'Oduist',
+    'live_test_url': 'https://demo15.odoopbx.com/',
+    'version': '3.8',
+    'author': 'Odooist',
     'price': 0,
-    'version': '4.2.0',
     'currency': 'EUR',
-    'maintainer': 'Oduist',
-    'support': 'support@oduist.com',
-    'license': 'Other proprietary',
+    'maintainer': 'Odooist',
+    'support': 'odooist@gmail.com',
+    'license': 'OPL-1',
     'category': 'Phone',
     'summary': 'Asterisk plus Odoo',
     'description': 'Asterisk plus Odoo',
-    'depends': ['base', 'mail', 'phone_validation'],
+    'depends': ['base', 'mail'],
     'external_dependencies': {
-        'python': [],
+        'python': ['phonenumbers'],
     },
     'data': [
         # Security rules
@@ -31,9 +31,10 @@
         'data/events.xml',
         'data/res_users.xml',
         'data/server.xml',
-        'data/data.xml',
+        'data/ref.xml',
         'data/agent_options.xml',
         # UI Views
+        'views/assets.xml',
         'views/menu.xml',
         'views/event.xml',
         'views/server.xml',
@@ -60,14 +61,14 @@
         'data/functions.xml',
     ],
     'installable': True,
+    'post_init_hook': 'post_init_hook',
     'application': True,
     'auto_install': False,
     'images': ['static/description/logo.png'],
     'assets': {
         'web.assets_backend': [
-            '/asterisk_plus/static/src/widgets/phone_field/*',
-            '/asterisk_plus/static/src/services/actions/*',
-            '/asterisk_plus/static/src/services/active_calls/*',
+            'asterisk_plus/static/src/js/actions.js',
+            'asterisk_plus/static/src/js/originate.js',
         ],
     }
 }

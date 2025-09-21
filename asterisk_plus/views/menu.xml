@@ -2,7 +2,7 @@
 
   <menuitem id="asterisk_top_menu" name="PBX"
       groups="asterisk_plus.group_asterisk_user,asterisk_plus.group_asterisk_admin"
-      sequence="21" web_icon='asterisk_plus,static/description/icon.png'/>
+      sequence="8" web_icon='asterisk_plus,static/description/icon.png'/>
 
   <menuitem id="asterisk_apps_menu" name="Applications"
         parent="asterisk_top_menu" sequence="100"/>

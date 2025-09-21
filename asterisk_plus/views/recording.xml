@@ -4,7 +4,7 @@
     <record id="asterisk_plus_recording_action" model="ir.actions.act_window">
       <field name="name">Recordings</field>
       <field name="res_model">asterisk_plus.recording</field>
-      <field name="view_mode">list,form</field>
+      <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="asterisk_plus_recording_menu"
@@ -17,19 +17,19 @@
       <field name="name">asterisk.plus.recording.list</field>
       <field name="model">asterisk_plus.recording</field>
       <field name="arch" type="xml">
-          <list edit="false" create="false" duplicate="false">
+          <tree edit="false" create="false" duplicate="false">
             <field name="answered"/>
-            <field name="calling_number" optional="hide"/>
-            <field name="called_number" optional="hide"/>
-            <field name="summary" optional="hide"/>
-            <field name="partner" optional="show"/>
-            <field name="calling_user" optional="show"/>
-            <field name="answered_user" optional="show"/>
-            <field name="tags" widget="many2many_tags" optional="show"/>
-            <field name="duration_human" optional="show"/>
-            <field name="duration" optional="hide"/>
-            <field name="icon" widget="html" optional="show"/>
-          </list>
+            <field name="calling_number"/>
+            <field name="called_number"/>
+            <field name="summary"/>
+            <field name="partner"/>
+            <field name="calling_user"/>
+            <field name="answered_user"/>
+            <field name="tags" widget="many2many_tags"/>
+            <field name="duration_human"/>
+            <field name="duration"/>
+            <field name="icon" widget="html"/>
+          </tree>
       </field>
     </record>
 
@@ -62,9 +62,8 @@
         <field name="type">form</field>
         <field name="arch" type="xml">
             <form create='0' edit='1' duplicate='0'>
-                <header>
+                <header>                  
                   <field  name="keep_forever" widget="statusbar" options="{'clickable': '1'}"/>
-                  <button name="get_transcript" class="btn-info" string="SEND TRANSCRIBE REQUEST" type="object"/>
                 </header>
                 <sheet>
                   <notebook>
@@ -74,14 +73,12 @@
                       </group>
                       <group>
                         <group>
-                          <field name="recording_widget" widget="html" nolabel="1" string="Recording"/>
+                          <field name="recording_widget" widget="html" nolabel="1"/>
                         </group>
                         <group>
                           <field name="recording_filename" invisible="1"/>
-                          <field name="recording_data" widget="binary" filename="recording_filename" string="Download"
-                                 invisible="recording_data == False"/>
-                          <field name="recording_attachment" widget="binary" filename="recording_filename" string="Download"
-                                 invisible="recording_attachment == False"/>
+                          <field name="recording_data" widget="binary" filename="recording_filename" attrs="{'invisible': [('recording_data', '=', False)]}"/>
+                          <field name="recording_attachment" widget="binary" filename="recording_filename" attrs="{'invisible': [('recording_attachment', '=', False)]}"/>
                         </group>
                       </group>
                       <group>
@@ -90,7 +87,7 @@
                               <field name="partner"/>
                               <field name="answered_user"/>
                               <field name="called_users" widget="many2many_tags"
-                                     invisible="call == False"/>
+                                attrs="{'invisible': [('call', '=', False)]}"/>
                               <field name="tags" widget="many2many_tags"/>
                           </group>
                           <group>
@@ -103,26 +100,19 @@
                       </group>
                     </page>
                     <page name="transcript" string="Transcript">
+                      <button name="get_transcript" class="btn-info" string="Transcription" type="object"/>
                       <group>
-                        <group>
-                          <field name="transcribe_error"
-                               invisible="transcribe_error == False"/>
-                          <field name="transcription_completion_model"/>
-                          <field name="transcription_prompt"/>
-                        </group>
-                        <group>
-                          <field name="transcription_finish_reason"/>
-                          <field name="transcription_completion_tokens"/>
-                          <field name="transcription_prompt_tokens"/>
-                        </group>
-                      </group>
-                      <group>
+                        <field name="transcription_error" attrs="{'invisible': [('transcription_error', '=', False)]}"/>
+                        <field name="transcription_price"/>
                         <field name="transcript"/>
-                      </group>
+                      </group>                      
                     </page>
                   </notebook>
                 </sheet>
-                <chatter/>
+                <div class="oe_chatter">
+                  <field name="message_follower_ids" widget="mail_followers"/>
+                  <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>

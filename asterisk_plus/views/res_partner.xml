@@ -4,7 +4,7 @@
     <record id='partner_calls_action' model='ir.actions.act_window'>
         <field name='name'>Calls</field>
         <field name='res_model'>asterisk_plus.call</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="domain">['|', ('partner','=', active_id), ('partner.parent_id','=', active_id)]</field>
     </record>
 
@@ -23,25 +23,42 @@
                 </button>
             </xpath>
             <field name="phone" position="after">
-                <field name="phone_extension" widget="phone"
-                       invisible="phone == False"/>
+                <field name="phone_extension" widget="originate_extension"
+                    attrs="{'invisible': [('phone', '=', False)]}"/>
             </field>
             <page name="internal_notes" position="after">
                 <page string="Recorded Calls" name="recordings"
-                      groups="asterisk_plus.group_asterisk_user,asterisk_plus.group_asterisk_admin">
-                    <div class="p-4">
+                        groups="asterisk_plus.group_asterisk_user,asterisk_plus.group_asterisk_admin">
+                    <group>
                         <field name="recorded_calls" nolabel="1">
-                            <list limit="5">
+                            <tree limit="5">
                                 <field name="recording_widget" widget="html"/>
                                 <field name="duration_human"/>
                                 <field name="answered"/>
                                 <field name="calling_user"/>
                                 <field name="answered_user"/>
-                            </list>
+                            </tree>
                         </field>
-                    </div>
+                    </group>
                 </page>
             </page>
+        </field>
+    </record>
+
+    <!-- The 2-nd form is for overwriting widget after sms form view will apply its changes. -->
+    <record id="view_partner_form_2" model="ir.ui.view">
+        <field name="name">asterisk_plus.res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">52</field>
+        <field name="arch" type="xml">
+            <field name="phone" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <field name="mobile" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
         </field>
     </record>
 
@@ -58,21 +75,21 @@
         </field>
     </record>
 
-    <record id='asterisk_plus_partner_action' model='ir.actions.act_window'>
+<record id='asterisk_plus_partner_action' model='ir.actions.act_window'>
         <field name='name'>Partner calls</field>
         <field name='res_model'>asterisk_plus.call</field>
-        <field name='view_mode'>list,form</field>
+        <field name='view_mode'>tree,form</field>
         <field name="domain">['|', ('partner','=', active_id), ('partner.parent_id','=', active_id)]</field>
-    </record>
+</record>
 
-    <!-- TODO
-    <record id="asterisk_plus_partner_kanban_view" model="ir.ui.view">
+
+<record id="asterisk_plus_partner_kanban_view" model="ir.ui.view">
         <field name="name">asterisk.calls.partner.kanban.view</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.res_partner_kanban_view"/>
         <field name="priority" eval="10"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('oe_kanban_bottom_left')]" position="inside">
+            <xpath expr="//div[hasclass('oe_kanban_partner_links')]" position="after">
                 <strong class="o_kanban_record_title oe_partner_heading">
                     <a type="action" name="%(asterisk_plus.asterisk_plus_partner_action)d" style="float: right">
                         <span class="fa fa-phone">
@@ -83,5 +100,5 @@
             </xpath>
         </field>
     </record>
-    -->
+
 </odoo>

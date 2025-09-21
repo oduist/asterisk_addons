@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="asterisk_plus_callgroup_action" model="ir.actions.act_window">
+        <field name="name">Call Groups</field>
+        <field name="res_model">asterisk_plus.callgroup</field>
+        <field name="view_mode">tree,form</field>        
+    </record>
+
+    <record id='calls_action' model='ir.actions.act_window'>
+        <field name='name'>Calls</field>
+        <field name='res_model'>asterisk_plus.call</field>
+        <field name='view_mode'>tree,form</field>
+        <field name="domain">[('callgroup', '=', active_id)]</field>
+    </record>
+
+    <menuitem id="asterisk_plus_callgroups_menu"
+            sequence="600"
+            parent="asterisk_plus.asterisk_apps_menu"
+            name="Call Groups"
+            action="asterisk_plus_callgroup_action"/>
+
+    <record id="asterisk_plus_callgroup_list" model="ir.ui.view">
+        <field name="name">asterisk_plus_callgroup_list</field>
+        <field name="model">asterisk_plus.callgroup</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="users" widget="many2many_tags"/>
+                <field name="dispatcher"/>
+                <field name="record_calls"/>
+                <field name="external_phone"/>
+                <field name="internal_phone"/>
+                <field name="fallback_group"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="asterisk_plus_callgroup_form" model="ir.ui.view" >
+        <field name="name">asterisk_plus_callgroup_form</field>
+        <field name="model">asterisk_plus.callgroup</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button"
+                                icon="fa-phone"
+                                name="%(calls_action)d"
+                                type="action">
+                                    <field name="calls_count" string="Calls" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <label class="oe_edit_only" for="name"/>
+                            <field name="name" placeholder="Call Group name..."/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page name="settings" string="Settings">
+                            <group>
+                                <group>
+                                    <field name="id" invisible="1"/>
+                                    <field name="users" widget="many2many_tags"/>
+                                    <field name="external_phone"/>
+                                    <field name="internal_phone"/>
+                                </group>
+                                <group>
+                                    <field name="dispatcher"/>
+                                    <field name="timeout"/>
+                                    <field name="record_calls"/>
+                                    <field name="fallback_group"/>
+                                </group>
+                            </group>        
+                        </page>
+                        <page name="prompts" string="Prompts"
+                                attrs="{'invisible': [('id', '=', False)]}">
+                            <group>
+                                <group>
+                                    <field name="active_prompt"/>
+                                </group>
+                                <group>
+                                    <button name="put_voicemail_prompts" string=" Sync" type="object" icon="fa-send"/>
+                                </group>
+                            </group>                            
+                            <group string="Prompt 1">
+                                <field name="voicemail_widget1" widget="html" nolabel="1"
+                                    attrs="{'invisible': [('callgroup_voicemail_prompt1', '=', False)]}"
+                                    />
+                                <field name="prompt_filename1" invisible="1"/>
+                                <field name="callgroup_voicemail_prompt1" string="Manage Prompt" widget="binary" filename="prompt_filename1"/>
+                            </group>
+                            <group string="Prompt 2">
+                                <field name="voicemail_widget2" widget="html" nolabel="1"
+                                    attrs="{'invisible': [('callgroup_voicemail_prompt2', '=', False)]}"
+                                    />
+                                <field name="prompt_filename2" invisible="1"/>
+                                <field name="callgroup_voicemail_prompt2" string="Manage Prompt" widget="binary" filename="prompt_filename2"/>
+                            </group>
+                            <group string="Prompt 3">
+                                <field name="voicemail_widget3" widget="html" nolabel="1"
+                                    attrs="{'invisible': [('callgroup_voicemail_prompt3', '=', False)]}"
+                                    />
+                                <field name="prompt_filename3" invisible="1"/>
+                                <field name="callgroup_voicemail_prompt3" string="Manage Prompt" widget="binary" filename="prompt_filename3"/>
+                            </group>
+                        </page>
+                    </notebook>                    
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+</odoo>

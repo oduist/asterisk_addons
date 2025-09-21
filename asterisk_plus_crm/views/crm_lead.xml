@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id='asterisk_calls_lead_action' model='ir.actions.act_window'>
+        <field name='name'>Calls</field>
+        <field name='res_model'>asterisk_plus.call</field>
+        <field name='view_mode'>tree,form</field>
+        <field name="domain">[('model','=', 'crm.lead'), ('res_id', '=', active_id)]</field>
+    </record>
+
+    <!-- Lead form view -->
+    <record id="view_lead_form" model="ir.ui.view">
+        <field name="name">asterisk_calls.crm.lead.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
+        <field name="arch" type="xml">
+
+            <field name="phone" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <field name="mobile" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(asterisk_calls_lead_action)d" type="action"
+                    class="oe_stat_button" icon="fa-phone"> 
+                    <field name="asterisk_calls_count" string="Calls" widget="statinfo"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Opportunity form view -->
+    <record id="view_opportunity_form" model="ir.ui.view">
+        <field name="name">asterisk_calls.crm.oppor.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+        <field name="arch" type="xml">
+            
+            <field name="phone" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <field name="partner_address_phone" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+            <field name="mobile" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(asterisk_calls_lead_action)d" type="action"
+                    class="oe_stat_button" icon="fa-phone"> 
+                    <field name="asterisk_calls_count" string="Calls" widget="statinfo"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="search_leads_calls" model="ir.ui.view">
+        <field name="name">asterisk_calls.crm.lead.search</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="phone"/>
+                <field name="mobile"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

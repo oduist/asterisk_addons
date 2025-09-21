@@ -1,3 +1,18 @@
 <odoo>
+    <record id="asterisk_plus_user_simplified_form" model="ir.ui.view">
+        <field name="name">asterisk_plus_user.res.user.simplified.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_simple_form"/>
+        <field name="arch" type="xml">
 
+            <field name="phone" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+            <field name="mobile" position="attributes">
+                <attribute name="widget">originate_call</attribute>
+            </field>
+
+        </field>
+    </record>
 </odoo>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="asterisk_plus_yestar_server_form" model="ir.ui.view">
+    <field name="name">asterisk_plus_yestar_server_form</field>
+    <field name="model">asterisk_plus.server</field>
+    <field name="inherit_id" ref="asterisk_plus.asterisk_plus_server_form"/>
+    <field name="arch" type="xml">
+      <button name="get_system_information" position="after">
+        <button name="yeastar_sync_users" type="object" icon="fa-send" string="Sync Users"/>
+      </button>
+      <page name="settings" position="after">
+        <page name="yeastar" string="Yeastar">
+          <group>            
+            <group>
+                <field name="yeastar_model"/>
+                <field name="yeastar_api_version"/>
+                <field name="yeastar_api_url"/>
+                <field name="yeastar_api_client_id" password="1"/>
+                <field name="yeastar_api_client_secret" password="1"/>
+            </group>
+            <group>
+              <field name="yeastar_verify_ssl"/>
+              <field name="yeastar_model_name"/>
+              <field name="yeastar_system_time"/>
+              <field name="yeastar_uptime"/>
+            </group>
+          </group>
+        </page>
+      </page>
+    </field>
+  </record>
+</odoo>

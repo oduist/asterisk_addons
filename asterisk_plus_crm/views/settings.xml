@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="asterisk_plus_crm_settings_form" model="ir.ui.view">
+    <field name="name">asterisk_plus_crm_settings_form</field>
+    <field name="model">asterisk_plus.settings</field>
+    <field name="inherit_id" ref="asterisk_plus.asterisk_settings_form"/>
+    <field name="arch" type="xml">
+      <page name="calls" position="after">
+        <page name="crm" string="CRM">
+          <group>
+            <group string="Incoming Calls">
+              <field name="auto_create_leads_for_in_calls"/>
+              <field name="auto_create_leads_for_in_answered_calls"
+                     attrs="{'invisible':[('auto_create_leads_for_in_calls','=',False)]}"/>
+              <field name="auto_create_leads_for_in_missed_calls"
+                     attrs="{'invisible':[('auto_create_leads_for_in_calls','=',False)]}"/>
+              <field name="auto_create_leads_for_in_unknown_callers"
+                     attrs="{'invisible':[('auto_create_leads_for_in_calls','=',False)]}"/>
+            </group>
+            <group string="Outgoing Calls">
+              <field name="auto_create_leads_for_out_calls"/>
+              <field name="auto_create_leads_for_out_answered_calls"
+                     attrs="{'invisible':[('auto_create_leads_for_out_calls','=',False)]}"/>
+              <field name="auto_create_leads_for_out_missed_calls"
+                     attrs="{'invisible':[('auto_create_leads_for_out_calls','=',False)]}"/>
+            </group>
+          </group>
+          <group string="Auto create options"
+                attrs="{'invisible':[('auto_create_leads_for_in_calls','=',False), ('auto_create_leads_for_out_calls','=',False)]}">
+            <group>
+              <field help="Assign this user as a sales person for calls without PBX user defined."
+                     name="auto_create_leads_sales_person"/>
+              <field help="Create leads or opportunities?"
+                  name="auto_create_leads_type"/>
+            </group>
+          </group>
+        </page>
+      </page>
+    </field>
+  </record>
+</odoo>

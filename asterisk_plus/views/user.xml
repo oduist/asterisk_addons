@@ -27,15 +27,16 @@
   <record id="asterisk_plus_user_list" model="ir.ui.view">
     <field name="name">asterisk_plus.user.list</field>
     <field name="model">asterisk_plus.user</field>
+    <field name="type">tree</field>
     <field name="arch" type="xml">
-      <list>
+      <tree>
         <button name="dial_user" icon="fa-phone" type="object" string=" "/>
         <field name="exten"/>
         <field name="user"/>
         <field name="phone"/>
         <field name="channels" widget="many2many_tags"/>
         <field name="user_call_count"/>
-      </list>
+      </tree>
     </field>
   </record>
 
@@ -45,22 +46,21 @@
     <field name="type">form</field>
     <field name="arch" type="xml">
       <form>
-        <header/>
+        <header>
+          <button name="apply_sip_peers" type="object" class="btn btn-primary" string="Apply SIP Channels"/>
+        </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
-            <field name="active" invisible="1"/>
-            <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
-                    invisible="active"/>
             <button class="oe_stat_button" icon="fa-phone"
                     name="action_view_calls" type="object">
                 <field name="user_call_count" widget="statinfo"/>
             </button>
           </div>
           <div name="title" class="oe_title">
-            <h1 class="d-flex flex-row align-items-center w-50">
+            <h1>
               <label class="oe_edit_only" for="exten"/>
               <field name="exten" placeholder="Number..." required="1"
-                    class="d-flex flex-row w-50" widget="phone"/>
+                    widget="originate_call"/>
             </h1>
           </div>
           <group>
@@ -71,31 +71,27 @@
               <field name="user" placeholder="Odoo user..." required="1"/>
             </group>
             <group>
-              <field name="did_number" class="d-flex flex-row w-50" widget="phone" placeholder="User DID number..." readonly="1" help="Enterprise Feature"/>
-              <field name="callerid_number" class="d-flex flex-row w-50" widget="phone" placeholder="User CallerID number..." readonly="1" help="Enterprise Feature"/>
+              <field name="did_number" class="d-flex flex-row w-50"  widget="originate_call" placeholder="User DID number..."/>
+              <field name="callerid_number" class="d-flex flex-row w-50"  widget="originate_call" placeholder="User CallerID number..."/>
             </group>
           </group>
           <notebook>
             <page name="channels" string="Channels">
-              <div class="d-flex">
-                <div class="p-2 me-5">
-                  <span>Channels</span>
-                </div>
-                <div class="p-2">
-                  <field name="channels" select="0" mode="list"
-                      domain="[('asterisk_user', '=', id)]"
-                      context="{'default_asterisk_user': id}">
-                    <list name="channels" editable="bottom">
+              <group>
+                  <field name="channels" select="0" mode="tree"
+                    domain="[('asterisk_user', '=', active_id)]"
+                    context="{'default_asterisk_user': active_id}">
+                    <tree name="channels" editable="bottom">
                       <field name="sequence" widget="handle"/>
                       <field name="name" placeholder="PJSIP/101"/>
                       <field name="sip_password" groups="asterisk_plus.group_asterisk_admin"
-                             column_invisible="True"/>
+                        attrs="{'column_invisible': [('parent.generate_sip_peers', '=', False)]}"/>
                       <field name="sip_transport"
-                             column_invisible="True"/>
+                        attrs="{'column_invisible': [('parent.generate_sip_peers', '=', False)]}"/>
                       <field name="originate_context" groups="asterisk_plus.group_asterisk_admin"/>
                       <field name="originate_enabled" widget="boolean_toggle"/>
                       <field name="auto_answer_header"/>
-                    </list>
+                    </tree>
                     <form>
                       <sheet>
                         <group>
@@ -111,8 +107,7 @@
                       </sheet>
                     </form>
                   </field>
-                </div>
-              </div>
+              </group>
               <group>
                 <group>
                   <field name="originate_vars"/>
@@ -134,14 +129,17 @@
             <page name="fagi" string="FAGI">
               <group>
                 <group>
-                  <field name="record_calls" readonly="1" help="Enterprise Feature"/>
-                  <field name="dial_timeout" readonly="1" help="Enterprise Feature"/>
+                  <field name="record_calls"/>
+                  <field name="dial_timeout"/>
                 </group>
               </group>
             </page>
           </notebook>
         </sheet>
-        <chatter/>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="message_ids" widget="mail_thread"/>
+        </div>
       </form>
     </field>
   </record>

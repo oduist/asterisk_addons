@@ -4,15 +4,15 @@
     <record id="asterisk_plus_tag_action" model="ir.actions.act_window">
         <field name="name">Tags</field>
         <field name="res_model">asterisk_plus.tag</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>        
     </record>
 
     <record id="tag_recordings_action" model="ir.actions.act_window">
         <field name="name">Tag Recordings</field>
         <field name="res_model">asterisk_plus.recording</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="domain">[('tags', 'in', active_id)]</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem id="asterisk_plus_tags_menu"
@@ -25,11 +25,11 @@
         <field name="name">asterisk_plus_tag_list</field>
         <field name="model">asterisk_plus.tag</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name"/>
                 <field name="create_uid" string="Created By"/>
-                <field name="recording_count" string="Recordings"/>
-            </list>
+                <field name="recording_count"/>
+            </tree>            
         </field>
     </record>
 
@@ -42,7 +42,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" icon="fa-file-audio-o"
                             type="action" name="%(tag_recordings_action)d">
-                            <field name="recording_count" widget="statinfo" string="Recordings"/>
+                            <field name="recording_count" widget="statinfo"/>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -60,7 +60,10 @@
                         </group>
                     </group>
                 </sheet>
-                <chatter/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>

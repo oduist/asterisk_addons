@@ -4,21 +4,21 @@
   <record id="call_channels_action" model="ir.actions.act_window">
     <field name="name">Call Channels</field>
     <field name="res_model">asterisk_plus.channel</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">tree,form</field>
     <field name="domain">[('call', '=', active_id)]</field>
   </record>
 
   <record id="asterisk_plus_active_calls_action" model="ir.actions.act_window">
     <field name="name">Active Calls</field>
     <field name="res_model">asterisk_plus.call</field>
-    <field name="view_mode">list,form</field>
+    <field name="view_mode">tree,form</field>
     <field name="domain">[('is_active', '=', True)]</field>
   </record>
 
   <record id="asterisk_plus_calls_history_action" model="ir.actions.act_window">
     <field name="name">Call History</field>
     <field name="res_model">asterisk_plus.call</field>
-    <field name="view_mode">list,form,graph,pivot</field>
+    <field name="view_mode">tree,form,graph,pivot</field>
     <field name="domain">[('is_active', '=', False)]</field>
   </record>
 
@@ -38,13 +38,13 @@
       <field name="name">asterisk_plus_call_list</field>
       <field name="model">asterisk_plus.call</field>
       <field name="arch" type="xml">
-          <list edit="false" create="false" duplicate="false" multi_edit="1">
-            <button name="listen" type="object" string="Listen" icon="fa-user-secret"
-                    invisible="is_active == False"/>
-            <button name="whisper" type="object" string="Whisper" icon="fa-user-plus"
-                    invisible="is_active == False"/>
-            <button name="barge" type="object" string="Barge" icon="fa-users"
-                    invisible="is_active == False"/>
+          <tree edit="false" create="false" duplicate="false">
+            <button name="listen" type="object" string="Listen"
+                attrs="{'invisible': [('is_active', '=', False)]}" icon="fa-user-secret"/>
+            <button name="whisper" type="object" string="Whisper"
+                attrs="{'invisible': [('is_active', '=', False)]}" icon="fa-user-plus"/>
+            <button name="barge" type="object" string="Barge"
+                attrs="{'invisible': [('is_active', '=', False)]}" icon="fa-users"/>
             <field name="started"/>
             <field name="direction_icon"/>
             <field name="partner"/>
@@ -53,15 +53,14 @@
             <field name="called_number"/>
             <field name="calling_user"/>
             <field name="answered_user"/>
-            <field name="direction_icon"/>
             <field name="duration_human"/>
-            <field name="duration_minutes" optional="hide" sum="1"/>
+            <field name="duration_minutes" sum="1"/>
             <field name="status"/>
             <field name="recording_icon" widget="html"/>
             <field name="voicemail_icon" widget="html"/>
-            <field name="is_active" column_invisible="1"/>
+            <field name="is_active" invisible="1"/>
             <field name="is_transfer_icon"/>
-          </list>
+            </tree>
       </field>
     </record>
 
@@ -70,59 +69,76 @@
     <field name="model">asterisk_plus.call</field>
     <field name="type">form</field>
     <field name="arch" type="xml">
-      <form create="0" edit="1" duplicate="0">
+      <form create='0' edit='1' duplicate='0'>
         <header>
           <field name="status" widget="statusbar"/>
-          <button string="Notes" name="set_notes" type="object" class="oe_highlight" icon="fa-pencil"/>
-          <button string="Partner" name="partner_button" type="object" class="oe_highlight" icon="fa-user-plus"
-                  invisible="partner == False"/>
-          <button type="object" name="save_call_recordings" string="Recording" groups="asterisk_plus.group_asterisk_admin"/>
+          <button string="Notes" name="set_notes" type="object"
+                  class="oe_highlight" icon='fa-pencil'/>
+          <button string="Partner" name="partner_button" type="object"
+            attrs="{'invisible': [('partner', '!=', False)]}"
+            class="oe_highlight" icon='fa-user-plus'/>
+            <button type="object" name="save_call_recordings" string="Recording" groups="asterisk_plus.group_asterisk_admin"/>
         </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
-            <button class="oe_stat_button" groups="asterisk_plus.group_asterisk_admin" string="Channels" icon="fa-list" name="%(call_channels_action)d" type="action"/>
+            <button class="oe_stat_button"
+                    groups="asterisk_plus.group_asterisk_admin"
+                    string="Channels"
+                    icon="fa-list"
+                    name="%(call_channels_action)d"
+                    type="action"/>
           </div>
             <h2><field name="name"/></h2>
             <notebook>
               <page name="main" string="Main">
                 <group>
                   <group name="calling">
-                    <div class="d-flex flex-row" colspan="2" cols="1">
-                      <div class="d-flex flex-column" calspan="1" style="flex: 1">
-                        <field name="calling_user_img" widget="image" class="oe_avatar" style="float: left" string="Image"
-                               invisible="calling_user == False"/>
+                    <div style="display: flex; align-items: center;">
+                      <div style="margin-right: 5px;">
+                        <field name="calling_user_img"
+                              attrs="{'invisible': [('calling_user', '=', False)]}"
+                              widget="image" class="oe_avatar"
+                              style="float: left"/>
                       </div>
+                      <group>
+                        <field name="calling_user" attrs="{'invisible': [('calling_user', '=', False)]}"/>
+                        <field name="calling_number" widget="originate_call"/>
+                        <field name="calling_name"/>
+                      </group>
                     </div>
-                    <field name="calling_user"
-                           invisible="calling_user == False"/>
-                    <field name="calling_number" widget="phone"/>
-                    <field name="calling_name"/>
                   </group>
                   <group name="called">
-                    <div class="d-flex flex-row" colspan="2" cols="1">
-                      <div class="d-flex flex-column" calspan="1" style="flex: 1">
-                        <field name="answered_user_img" widget="image" class="oe_avatar" style="float: left" string="Image"
-                               invisible="answered_user == False"/>
+                    <div style="display: flex; align-items: center;">
+                      <div style="margin-right: 5px;">
+                        <field name="answered_user_img"
+                              attrs="{'invisible': [('answered_user', '=', False)]}"
+                              widget="image" class="oe_avatar"
+                              style="float: left"/>
                       </div>
+                      <group>
+                        <field name="answered_user" attrs="{'invisible': [('answered_user', '=', False)]}"/>
+                        <field name="called_number" widget="originate_call"/>
+                        <field name="called_users" widget="many2many_tags"
+                            attrs="{'invisible': [('called_users', '=', [])]}"/>
+                      </group>
                     </div>
-                    <field name="answered_user"
-                           invisible="answered_user == False"/>
-                    <field name="called_number" widget="phone"/>
-                    <field name="called_users" widget="many2many_tags"
-                           invisible="called_users == []"/>
                   </group>
                 </group>
 
                 <group>
                   <group>
-                    <div class="d-flex flex-row" colspan="2" cols="1">
-                      <div class="d-flex flex-column" calspan="1" style="flex: 1">
-                        <field name="partner_img" widget="image" class="oe_avatar" style="float: left" string="Image"
-                               invisible="partner == False"/>
+                    <div style="display: flex; align-items: center;">
+                      <div style="margin-right: 5px;">
+                        <field name="partner_img"
+                                attrs="{'invisible': [('partner', '=', False)]}"
+                                widget="image" class="oe_avatar"
+                                style="float: left"/>
                       </div>
+                      <group>
+                        <field name="partner" context="{'call_id': active_id}"/>
+                        <field name="ref" context="{'call_id': active_id}"/>
+                      </group>
                     </div>
-                    <field name="partner" context="{'call_id': id}"/>
-                    <field name="ref" context="{'call_id': id}"/>
                   </group>
                   <group>
                     <field name="started"/>
@@ -137,42 +153,51 @@
                   </group>
                   <group string="VoiceMail">
                     <field name="voicemail_widget" nolabel="1" widget="html"
-                           invisible="voicemail_widget == ''"/>
+                      attrs="{'invisible': [('voicemail_widget', '=', '')]}"/>
                   </group>
                 </group>
               </page>
-              <page name="channels" groups="asterisk_plus.group_asterisk_admin" string="Channels"
-                    invisible="channels == []">
+              <page name="channels"
+                    groups="asterisk_plus.group_asterisk_admin"
+                    string="Channels"
+                    attrs="{'invisible': [('channels', '=', [])]}">
                 <field name="channels">
-                  <list>
+                  <tree>
                     <field name="channel"/>
                     <field name="state_desc"/>
                     <field name="cause_txt"/>
                     <field name="exten"/>
                     <field name="callerid_num"/>
                     <field name="user"/>
-                  </list>
+                  </tree>
                 </field>
               </page>
-              <page name="recordings" string="Recordings"
-                    invisible="recordings == []">
+              <page name="recordings"
+                    string="Recordings"
+                    attrs="{'invisible': [('recordings', '=', [])]}">
                 <field name="recordings">
-                  <list>
-                    <field name="recording_widget" widget="html" nolabel="1" />
-                  </list>
+                  <tree>
+                    <field name="recording_widget" widget="html" nolabel="1"/>
+                  </tree>
                 </field>
               </page>
               <page name="events" string="Events">
-                <field name="events" nolabel="1" options="{'no_open': True}">
-                  <list>
-                    <field name="event"/>
-                    <field name="create_date"/>
-                  </list>
-                </field>
+                <group>
+                  <field name="events" nolabel="1" options="{'no_open': True}">
+                    <tree>
+                      <field name="event"/>
+                      <field name="create_date"/>
+                    </tree>
+                  </field>
+                </group>
               </page>
           </notebook>
         </sheet>
-        <chatter/>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="activity_ids"/>
+          <field name="message_ids" widget="mail_thread"/>
+        </div>
       </form>
     </field>
   </record>
@@ -182,8 +207,8 @@
     <field name="model">asterisk_plus.call</field>
     <field name="arch" type="xml">
       <graph type="bar" string="Call by day">
-        <field name="started" type="row" interval="day"/>
-        <field name="status" type="row"/>
+        <field name='started' type='row'  interval="day"/>
+        <field name='status' type='row'/>
         <field name="duration" type="measure"/>
       </graph>
     </field>
@@ -194,30 +219,12 @@
     <field name="model">asterisk_plus.call</field>
     <field name="arch" type="xml">
       <pivot display_quantity="true" string="Calls">
-        <field name="started" type="row"/>
-        <field name="status" type="row"/>
+        <field name='started' type='row'/>
+        <field name='status' type='row'/>
         <field name="duration" type="measure"/>
       </pivot>
     </field>
   </record>
-
-  <record id="asterisk_plus_call_activity" model="ir.ui.view">
-    <field name="name">asterisk_plus_call_activity</field>
-    <field name="model">asterisk_plus.call</field>
-    <field name="arch" type="xml">
-      <activity string="Calls">
-        <field name="name"/>
-        <templates>
-            <div t-name="activity-box">
-                <div>
-                    <field name="name"/>
-                </div>
-            </div>
-        </templates>
-      </activity>
-    </field>
-  </record>
-
 
   <record id="asterisk_plus_call_search" model="ir.ui.view">
     <field name="name">asterisk.plus.call.search</field>

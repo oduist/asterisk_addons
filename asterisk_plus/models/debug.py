@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class Debug(models.Model):

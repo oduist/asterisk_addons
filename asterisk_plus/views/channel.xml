@@ -5,7 +5,7 @@
       <field name="name">asterisk.plus.channel.list</field>
       <field name="model">asterisk_plus.channel</field>
       <field name="arch" type="xml">
-          <list edit="false" create="false" duplicate="false">
+          <tree edit="false" create="false" duplicate="false">
             <field name="exten"/>
             <field name="state"/>
             <field name="callerid_num"/>
@@ -19,7 +19,7 @@
             <field name="parent_channel"/>
             <field name="call"/>
             <field name="user"/>
-          </list>
+          </tree>
       </field>
     </record>
 
@@ -85,10 +85,10 @@
                     </group>
                     <group>
                       <field name="channel_data">
-                        <list>
+                        <tree>
                           <field name="key"/>
                           <field name="value"/>
-                        </list>
+                        </tree>
                       </field>
                     </group>
                 </sheet>
@@ -99,11 +99,11 @@
     <record id="asterisk_plus_channel_action" model="ir.actions.act_window">
       <field name="name">Channels</field>
       <field name="res_model">asterisk_plus.channel</field>
-      <field name="view_mode">list,form</field>
+      <field name="view_mode">tree,form</field>
       <field name="view_ids" eval="[
         (5, 0, 0),
         (0, 0, {
-            'view_mode': 'list',
+            'view_mode': 'tree',
             'view_id': ref('asterisk_plus.asterisk_plus_channel_list'),
             }),
         (0, 0, {

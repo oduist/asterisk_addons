@@ -1,0 +1,3 @@
+<odoo>
+    <function name="gs_set_default_webrtc" model="asterisk_plus.server"/>
+</odoo>

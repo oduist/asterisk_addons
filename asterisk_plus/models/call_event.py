@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2021
 from datetime import datetime, timedelta
 import json
 import logging
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)

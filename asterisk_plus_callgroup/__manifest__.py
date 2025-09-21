@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+{
+    'name': "Asterisk Plus Call Group",
+    'live_test_url': 'https://demo15.odoopbx.com/',
+    'description': """Ring group configuration added""",
+    'currency': 'EUR',
+    'price': '0',
+    'version': '1.2',
+    'category': 'Phone',
+    'author': 'Odooist',
+    'license': 'OPL-1',
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+    'depends': ['asterisk_plus'],
+    'data': [
+        'data/events.xml',
+        'security/admin.xml',
+        'security/server.xml',
+        'views/callgroup.xml',
+        'views/call.xml',
+        'views/user.xml',
+    ],
+    'demo': [],
+    'images': ['static/description/icon.png'],
+}

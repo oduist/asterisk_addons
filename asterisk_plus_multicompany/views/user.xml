@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="asterisk_plus_user_list_mc" model="ir.ui.view">
+        <field name="name">asterisk_plus_user_list_mc</field>
+        <field name="model">asterisk_plus.user</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_user_list"/>
+        <field name="arch" type="xml">
+            <field name="user" position="after">
+                <field name="company_id"/>
+            </field>
+        </field>
+    </record>
+ 
+    <record id="asterisk_plus_user_form_mc" model="ir.ui.view">
+        <field name="name">asterisk_plus_user_form_mc</field>
+        <field name="model">asterisk_plus.user</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_user_form"/>
+        <field name="arch" type="xml">
+            <field name="user" position="after">
+                <field name="company_id"/>
+            </field>
+        </field>
+    </record>
+ </odoo>

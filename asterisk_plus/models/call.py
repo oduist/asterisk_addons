@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2021
 from datetime import datetime, timedelta
 import json
 import logging
@@ -7,7 +7,7 @@ import pytz
 import uuid
 import phonenumbers
 import time
-from odoo import models, fields, api, tools, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .settings import debug
@@ -26,7 +26,7 @@ class Call(models.Model):
     _log_access = False
     _rec_name = 'id'
 
-    if release.version_info[0] >= 17.0:
+    if release.version_info[0] == 17.0:
         # Fix for Odoo 17.0 write date field.
         write_date = fields.Datetime('Last Modified', readonly=True, copy=False, default=fields.Datetime.now)
     name = fields.Char(compute='_get_name')
@@ -55,13 +55,13 @@ class Call(models.Model):
     recording_icon = fields.Html(compute='_get_recording_icon', string='R')
     partner = fields.Many2one('res.partner', ondelete='set null')
     partner_img = fields.Binary(related='partner.image'
-      if release.version_info[0] < 13 else 'partner.image_1920', string="Partner Image")
+      if release.version_info[0] < 13 else 'partner.image_1920')
     calling_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     calling_user_img = fields.Binary(related='calling_user.image'
-      if release.version_info[0] < 13 else 'calling_user.image_1920', string="Calling User Image")
+      if release.version_info[0] < 13 else 'calling_user.image_1920')
     answered_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     answered_user_img = fields.Binary(related='answered_user.image'
-          if release.version_info[0] < 13 else 'answered_user.image_1920', string="Answered User Image")
+          if release.version_info[0] < 13 else 'answered_user.image_1920')
     called_users = fields.Many2many('res.users', readonly=True)
     calling_avatar = fields.Text(compute='_get_calling_avatar', readonly=True)
     # Related object
@@ -70,9 +70,9 @@ class Call(models.Model):
     ref = fields.Reference(
         string='Reference',
         selection=[
-            ('res.partner', 'Partners'),
-            ('asterisk_plus.call', 'Calls'),
-            ('asterisk_plus.user', 'Users')],
+            ('res.partner', _('Partners')),
+            ('asterisk_plus.call', _('Calls')),
+            ('asterisk_plus.user', _('Users'))],
         compute='_get_ref',
         inverse='_set_ref')
     ref_name = fields.Char(compute='_get_ref_name')
@@ -80,12 +80,12 @@ class Call(models.Model):
     duration = fields.Integer(readonly=True, compute='_get_duration', store=True)
     duration_minutes = fields.Float(readonly=True, digits=(16,2), compute='_get_duration', store=True)
     duration_human = fields.Char(
-        string='Call Duration',
+        string=_('Call Duration'),
         compute='_get_duration_human',
         store=True)
     voicemail_icon = fields.Html(compute='_get_voicemail_widget', string='V')
     voicemail_filename = fields.Char(readonly=True, index=True)
-    voicemail_data = fields.Binary(attachment=True, readonly=True, string='Download')
+    voicemail_data = fields.Binary(attachment=True, readonly=True, string=_('Download'))
     if release.version_info[0] >= 17.0:
         voicemail_widget = fields.Html(compute='_get_voicemail_widget', string='VoiceMail', sanitize=False)
     else:
@@ -95,11 +95,11 @@ class Call(models.Model):
     is_transfer_icon = fields.Html(compute='_get_is_transfer_icon', string='T', store=True)
     is_stuck_active_call = fields.Boolean(index=True)
 
-    @api.model_create_multi
-    def create(self, vals_list):
+    @api.model
+    def create(self, vals):
         # Reload after call is created
         call = super(Call, self.with_context(
-            mail_create_nosubscribe=True, mail_create_nolog=True)).create(vals_list)
+            mail_create_nosubscribe=True, mail_create_nolog=True)).create(vals)
         self.reload_calls()
         return call
 
@@ -241,7 +241,7 @@ class Call(models.Model):
                 ref_block)
         # Check user notify settings.
         if asterisk_user.call_popup_is_enabled:
-            self.env['asterisk_plus.settings'].asterisk_plus_notify(
+            self.env['asterisk_plus.settings'].odoopbx_notify(
                 message,
                 notify_uid=asterisk_user.user.id,
                 sticky=asterisk_user.call_popup_is_sticky)
@@ -264,11 +264,11 @@ class Call(models.Model):
                 'res_id': res_id
             }
             self.env['bus.bus'].sendone(
-                'asterisk_plus_actions_{}'.format(asterisk_user.user.id),
+                'odoopbx_actions_{}'.format(asterisk_user.user.id),
                 json.dumps(msg))
         else:
             self.env['bus.bus']._sendone(
-                'asterisk_plus_actions_{}'.format(asterisk_user.user.id),
+                'odoopbx_actions_{}'.format(asterisk_user.user.id),
                 'open_record',
                 {'model': model, 'res_id': res_id}
             )
@@ -325,18 +325,18 @@ class Call(models.Model):
                 'action': 'reload_view',
                 'model': 'asterisk_plus.call'
             }
-            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+            self.env['bus.bus'].sendone('odoopbx_actions', json.dumps(msg))
         else:
             msg = {'model': 'asterisk_plus.call'}
             self.env['bus.bus']._sendone(
-                'asterisk_plus_actions',
+                'odoopbx_actions',
                 'reload_view',
-                msg
+                json.dumps(msg)
             )
 
     def set_notes(self):
         return {
-            'name': "Set Note",
+            'name': _("Set Note"),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'asterisk_plus.set_notes_wizard',
@@ -427,6 +427,15 @@ class Call(models.Model):
         def sub_register_call(obj, **kwargs):
             if obj:
                 try:
+                    is_missed_call = self.direction == 'in' and self.status != 'answered'
+                    mt_note = self.env.ref('mail.mt_note').id
+                    mt_comment = self.env.ref('mail.mt_comment').id
+                    if is_missed_call:
+                        kwargs['subtype_id'] = mt_comment
+                        #kwargs['message_type'] = 'comment'
+                    else:
+                        kwargs['subtype_id'] = mt_note
+                        #kwargs['message_type'] = 'notification'
                     if release.version_info[0] < 13:
                         obj.sudo(SUPERUSER_ID).with_context(mail_create_nosubscribe=False).message_post(**kwargs)
                     else:
@@ -453,17 +462,16 @@ class Call(models.Model):
                     notify_users.append(user)
         # Register call at partner or reference object
         if self.partner and self.model != 'res.partner':
-            sub_register_call(self.partner, body=' '.join(message), subtype_xmlid='mail.mt_note')
+            sub_register_call(self.partner, body=' '.join(message))
             message.insert(1, 'partner {}'.format(self.partner.name))
         if self.ref:
-            sub_register_call(self.ref, body=' '.join(message), subtype_xmlid='mail.mt_note')
+            sub_register_call(self.ref, body=' '.join(message))
             message.insert(2, 'ref {}'.format(self.ref.name))
         # Register call to users
         if self.direction == 'in' and self.status != 'answered' and notify_users:
             debug(self, 'Missed call notification to users: {}'.format(notify_users))
             sub_register_call(
                 self,
-                subtype_xmlid='mail.mt_comment',
                 subject=self.name,
                 body=' '.join(message),
                 partner_ids=[k.partner_id.id for k in notify_users]
@@ -486,24 +494,26 @@ class Call(models.Model):
                 'res_id': self.partner.id,
                 'name': 'Call Partner',
                 'view_mode': 'form',
+                'view_type': 'form',
                 'target': 'current',
                 'context': context,
             }
         else:
-            raise ValidationError('Partner is already defined!')
+            raise ValidationError(_('Partner is already defined!'))
 
     def _spy(self, option):
         self.ensure_one()
         asterisk_user = self.env.user.asterisk_users.filtered(
             lambda x: x.server == self.server)
         if not asterisk_user:
-            raise ValidationError('PBX user is not configured!')
+            raise ValidationError(
+                _('PBX user is not configured!'))
         if not asterisk_user.channels:
-            raise ValidationError('User has not channels to originate!')
+            raise ValidationError(_('User has not channels to originate!'))
         # Get parrent channel for a call
         channel = self.channels.filtered(lambda x: not x.parent_channel)
         if not channel:
-            raise ValidationError('Parrent channel for a call not found!')
+            raise ValidationError(_('Parrent channel for a call not found!'))
         if option == 'q':
             callerid = 'Spy'
         elif option == 'qw':

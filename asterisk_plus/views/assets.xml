@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <template id="asterisk_plus_assets_backend" name="asterisk_plus_assets" inherit_id="web.assets_backend">
+    <xpath expr="." position="inside">
+      <script type="text/javascript" src="/asterisk_plus/static/src/js/actions.js"/>
+      <script type="text/javascript" src="/asterisk_plus/static/src/js/originate.js"/>
+      <script type="text/javascript" src="/asterisk_plus/static/src/js/intercom.js"/>
+    </xpath>
+  </template>
+</odoo>

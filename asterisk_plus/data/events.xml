@@ -18,22 +18,12 @@
       <field name="condition">not event['Channel'].startswith('Local/')</field>
     </record>
 
-    <!-- Primary channel -->
     <record id="new_channel" model="asterisk_plus.event">
       <field name="name">Newchannel</field>
       <field name="source">AMI</field>
       <field name="model">asterisk_plus.channel</field>
       <field name="method">on_ami_new_channel</field>
-      <field name="condition">not event['Channel'].startswith('Local/') and event['Uniqueid'] == event['Linkedid']</field>
-    </record>
-    <!-- Secondary channel with a small delay -->
-    <record id="new_channel_secondary" model="asterisk_plus.event">
-      <field name="name">Newchannel</field>
-      <field name="source">AMI</field>
-      <field name="model">asterisk_plus.channel</field>
-      <field name="method">on_ami_new_channel</field>
-      <field name="delay">0.2</field>
-      <field name="condition">not event['Channel'].startswith('Local/') and event['Uniqueid'] != event['Linkedid']</field>
+      <field name="condition">not event['Channel'].startswith('Local/')</field>
     </record>
 
     <record id="new_state" model="asterisk_plus.event">

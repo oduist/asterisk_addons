@@ -6,10 +6,10 @@ import time
 from urllib.parse import urljoin, quote
 import uuid
 import logging
-from odoo import models, fields, api, tools, release, release, SUPERUSER_ID
+from odoo import models, fields, api, _, tools, release, release, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from .server import debug
-from .settings import RECORDING_ACCESS_SELECTION
+from .settings import MODULE_NAME, RECORDING_ACCESS_SELECTION
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +36,13 @@ class Recording(models.Model):
     duration = fields.Integer(related='call.duration', store=True)
     duration_human = fields.Char(related='call.duration_human', store=True)
     if release.version_info[0] >= 17.0:
-        recording_widget = fields.Html(compute='_get_recording_widget', sanitize=False)
+        recording_widget = fields.Html(compute='_get_recording_widget', string='Recording', sanitize=False)
     else:
-        recording_widget = fields.Char(compute='_get_recording_widget')
+        recording_widget = fields.Char(compute='_get_recording_widget', string='Recording')
     recording_filename = fields.Char(readonly=True, index=True)
-    recording_data = fields.Binary(attachment=False, readonly=True)
+    recording_data = fields.Binary(attachment=False, readonly=True, string=_('Download'))
     recording = fields.Binary(compute='_get_recording')
-    recording_attachment = fields.Binary(attachment=True, readonly=True)
+    recording_attachment = fields.Binary(attachment=True, readonly=True, string=_('Download'))
     recording_access = fields.Selection(selection=RECORDING_ACCESS_SELECTION)
     recording_access_url = fields.Char()
     file_path = fields.Char(readonly=True)
@@ -55,13 +55,10 @@ class Recording(models.Model):
     ], default='no', tracking=True)
     icon = fields.Html(compute='_get_icon', string='I')
     ############## TRANSCRIPTION FIELDS ######################################
-    transcript = fields.Text(readonly=True)
-    transcribe_error = fields.Char(readonly=True)
-    transcription_completion_tokens = fields.Char(string='Completion Tokens', readonly=True)
-    transcription_completion_model = fields.Char(string='Model', readonly=True)
-    transcription_prompt_tokens = fields.Char(string='Prompt Tokens', readonly=True)
-    transcription_prompt = fields.Char(string='Prompt', readonly=True)
-    transcription_finish_reason = fields.Char(string='Finish Reason', readonly=True)
+    transcript = fields.Text()
+    transcription_token = fields.Char()
+    transcription_error = fields.Char()
+    transcription_price = fields.Char()
     summary = fields.Text()
     ##########################################################################
 
@@ -76,11 +73,14 @@ class Recording(models.Model):
             else:
                 rec.transcript_short = ''
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(Recording, self.with_context(
-            mail_create_nosubscribe=True, mail_create_nolog=True)).create(vals_list)
-        return res
+    @api.model
+    def create(self, vals):
+        rec = super(Recording, self.with_context(
+            mail_create_nosubscribe=True, mail_create_nolog=True)).create(vals)
+        # Commit to the database as recordings are created by the Agent.
+        if self.env['asterisk_plus.settings'].sudo().get_param('transcript_calls'):
+            rec.get_transcript(fail_silently=True)
+        return rec
 
     def write(self, vals):
         if vals.get("tags"):
@@ -95,7 +95,7 @@ class Recording(models.Model):
             for tag in tags_to_notify:
                 self.env['asterisk_plus.tag'].browse(
                     tag).sudo().message_post(
-                        subject='Tag attached to recording',
+                        subject=_('Tag attached to recording'),
                         body=msg)
         res = super(Recording, self).write(vals)
 
@@ -124,8 +124,7 @@ class Recording(models.Model):
     def file_delete_result(self, result, rec_id=None):
         if result == True:
             # We use sudo as the Agent does not have access to remove recordings, so write access.
-            have_access = self.check_access_rights('write', raise_exception=False) if release.version_info[0] < 18 else self.check_access('write')
-            if have_access:
+            if self.check_access_rights('write', raise_exception=False):
                 self.env['asterisk_plus.recording'].sudo().with_context(
                     no_remote_delete=True).browse(rec_id).unlink()
         return True
@@ -167,8 +166,13 @@ class Recording(models.Model):
         for rec in recording_channel_data:
             self.save_call_recording(call, rec)
 
-    def get_all_recording_data(self, call):
-        return {
+    @api.model
+    def save_call_recording(self, call, recording_channel_data):
+        recording_file_path = recording_channel_data.value
+        debug(self, 'Call %s getting recording from %s' % (
+            call.id, recording_file_path))
+        # Get recording access settings.
+        kwargs = {
             'recordings_access': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access'),
             'recordings_access_url': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access_url'),
             'recordings_s3_region': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_region'),
@@ -176,14 +180,14 @@ class Recording(models.Model):
             'recordings_s3_key': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_key'),
             'recordings_s3_secret': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_secret'),
         }
-
-    @api.model
-    def save_call_recording(self, call, recording_channel_data):
-        recording_file_path = recording_channel_data.value
-        debug(self, 'Call %s getting recording from %s' % (
-            call.id, recording_file_path))
-        # Get recording access settings.
-        kwargs = self.get_all_recording_data(call)
+        mp3_encode = self.env['asterisk_plus.settings'].sudo().get_param(
+            'use_mp3_encoder')
+        if mp3_encode:
+            kwargs['file_format'] = 'mp3'
+            kwargs['mp3_bitrate'] = int(self.env['asterisk_plus.settings'].sudo().get_param(
+                'mp3_encoder_bitrate', default='96'))
+            kwargs['mp3_quality'] = int(self.env['asterisk_plus.settings'].sudo().get_param(
+                'mp3_encoder_quality', default=4))
         call.server.local_job(
             fun='recording.get_file',
             args=recording_file_path,
@@ -233,8 +237,15 @@ class Recording(models.Model):
             vals['recording_data'] = file_data
         # Create a recording
         rec = self.create(vals)
-        if self.env['asterisk_plus.settings'].sudo().get_param('transcribe_calls'):
-            rec.get_transcript(fail_silently=True)
+        # Remove recording after download
+        if self.env['asterisk_plus.settings'].sudo().get_param('recordings_access') in [
+                    'local', 'asterisk_http'] and \
+                self.env['asterisk_plus.settings'].sudo().get_param('recording_remove_after_download'):
+            call.server.local_job(
+                fun='file.delete',
+                args=file_path,
+                raise_exc=False,
+            )
         return True
 
     @api.model
@@ -337,86 +348,87 @@ class Recording(models.Model):
             else:
                 rec.icon = ''
 
+    def prepare_transcription_content(self):
+        data = {
+            'file_name': self.recording_filename,
+            'content': self.recording.decode(),
+        }
+        return data
+
     ############## TRANSCRIPTION METHODS #####################################
 
     def get_transcript(self, fail_silently=False):
         self.ensure_one()
-        openai_api_key = self.env['asterisk_plus.settings'].sudo().get_param('openai_api_key')
-        if not openai_api_key:
-            if fail_silently:
-                logger.warning('OpenAI key is not set! Not doing call transcription.')
-                return
-            else:
-                raise ValidationError('OpenAI API key is not set!')
+        # First check if the call matches the transcription rules.
+        if fail_silently and not self.env['asterisk_plus.transcription_rule'].sudo().check_rules(
+                self.calling_number, self.called_number):
+            return False
         # We passed the rules, let's do the transcription!
+        url = urljoin(self.env['%s.settings' % MODULE_NAME].sudo().get_param('api_url'),
+            'transcription')
+        self.transcription_token = str(uuid.uuid4())
+        self.env.cr.commit()
         try:
-            data = {
-                'openai_api_key': openai_api_key,
-                'summary_prompt': self.env['asterisk_plus.settings'].sudo().get_param('summary_prompt'),
-                'completion_model': self.env['asterisk_plus.settings'].sudo().get_param('completion_model'),
-            }
-            self.call.server.local_job(
-                fun='recording.get_transcript',
-                args=self.file_path,
-                kwargs=data,
-                res_model='asterisk_plus.recording',
-                res_method='update_transcript',
-                pass_back={'rec_id': self.id, 'notify_uid': self.env.user.id},
-                raise_exc=False,
-            )
-            return True
-            logger.info('Transcription request has been sent.')
+            data = self.prepare_transcription_content()
+            data.update({
+                'summary_prompt': self.env['%s.settings' % MODULE_NAME].sudo().get_param('summary_prompt'),
+                'callback_url': urljoin(
+                    self.env['asterisk_plus.settings'].sudo().get_param('web_base_url'),
+                    '/{}/transcript/{}'.format(MODULE_NAME, self.id)),
+            'transcription_token': self.transcription_token,
+            'notify_uid': self.env.user.id,
+            })
+            res = requests.post(url,
+                json=data,
+                headers={
+                    'x-instance-uid': self.env['%s.settings' % MODULE_NAME].sudo().get_param('instance_uid'),
+                    'x-api-key': self.env['ir.config_parameter'].sudo().get_param('odoopbx.api_key')
+                })
+            if not res.ok:
+                self.transcription_error = res.text
+                if not fail_silently:
+                    raise ValidationError(res.text)
+            logger.info('Transcription request has been sent')
         except Exception as e:
             logger.exception('Transcription error: %s', e)
             if not fail_silently:
                 raise ValidationError('Transcription error: %s' % e)
-    @api.model
-    def update_transcript(self, data, rec_id=None, notify_uid=None):
-        rec = self.browse(rec_id)
+
+    def update_transcript(self, data):
+        # Update transcription and also erase access token.
+        self.ensure_one()
+        transcription_price = data.get('transcription_price')
+        if transcription_price:
+            # Round
+            transcription_price = round(transcription_price, 4)
         vals = {
             'transcript': data.get('transcript'),
+            'transcription_price': str(transcription_price),
             'summary': data.get('summary'),
-            'transcribe_error': data.get('error'),
-            'transcription_prompt': data.get('prompt'),
-            'transcription_finish_reason': data.get('finish_reason'),
-            'transcription_prompt_tokens': data.get('prompt_tokens'),
-            'transcription_completion_tokens': data.get('completion_tokens'),
-            'transcription_completion_model': data.get('completion_model'),
+            # Reset the token
+            'transcription_token': False,
+            'transcription_error': data.get('transcription_error')
         }
-        rec.write(vals)
+        self.write(vals)
         # Reload views when transcription has come.
-        self.env['asterisk_plus.settings'].asterisk_plus_reload_view('asterisk_plus.recording')
+        self.env['%s.settings' % MODULE_NAME].odoopbx_reload_view('%.recording' % MODULE_NAME)
         # Notify user
-        if notify_uid:
-            self.env['asterisk_plus.settings'].asterisk_plus_notify(
-                'Transcription updated', notify_uid=notify_uid)
-            self.env['asterisk_plus.settings'].asterisk_plus_reload_view('asterisk_plus.recording')
+        if data.get('notify_uid'):
+            self.env['%s.settings' % MODULE_NAME].odoopbx_notify(
+                'Transcription updated', notify_uid=data['notify_uid'])
+            self.env['%s.settings' % MODULE_NAME].odoopbx_reload_view('%s.recording' % MODULE_NAME)
         # Register summary if partner is linked.
-        register_summary = self.env['asterisk_plus.settings'].sudo().get_param('register_summary')
-        if rec.partner and data.get('summary') and register_summary:
-            obj = rec.partner
+        if self.partner and data.get('summary') and self.env[
+                '%s.settings' % MODULE_NAME].sudo().get_param('register_summary'):
+            obj = self.partner
             try:
                 if release.version_info[0] < 14:
                     obj.sudo(SUPERUSER_ID).message_post(body=data['summary'])
                 else:
                     obj.with_user(SUPERUSER_ID).message_post(body=data['summary'])
                 # Reload the view of res.partner
-                self.env['asterisk_plus.settings'].asterisk_plus_reload_view('res.partner')
+                self.env['%s.settings' % MODULE_NAME].odoopbx_reload_view('res.partner')
             except Exception as e:
                 logger.error('Cannot register summary: %s', e)
-        # Register summary if reference is linked.
-        if rec.call.ref and not rec.call.model == 'res.partner' and data.get('summary') and register_summary:
-            obj = rec.call.ref
-            try:
-                if release.version_info[0] < 14:
-                    obj.sudo(SUPERUSER_ID).message_post(body=data['summary'])
-                else:
-                    obj.with_user(SUPERUSER_ID).message_post(body=data['summary'])
-                # Reload the view of res.partner
-                self.env['asterisk_plus.settings'].asterisk_plus_reload_view(rec.call.model)
-            except Exception as e:
-                logger.error('Cannot register summary: %s', e)
-
-        return True
 
 ##########  END OF TRANSCRIPTION METHODS #########################################################

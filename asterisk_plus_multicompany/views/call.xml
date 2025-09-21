@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="asterisk_plus_call_form_mc" model="ir.ui.view">
+        <field name="name">asterisk_plus_call_form_mc</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_form"/>
+        <field name="arch" type="xml">
+            <field name="notes" position="before">
+                <field name="company_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="asterisk_plus_call_list_mc" model="ir.ui.view">
+        <field name="name">asterisk_plus_call_list_mc</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_list"/>
+        <field name="arch" type="xml">
+            <field name="is_active" position="after">
+                <field name="company_id" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="group_by_company_call_search" model="ir.ui.view">
+        <field name="name">group_by_company_call_search</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_search"/>
+        <field name="arch" type="xml">
+            <filter name="by_model" position="after">
+                <filter name="by_company_id" string="Company" context="{'group_by':'company_id'}"/>
+            </filter>
+        </field>
+    </record>
+ 
+ </odoo>

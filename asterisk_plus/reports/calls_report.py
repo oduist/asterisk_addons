@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 from datetime import timedelta
 import logging
 import time

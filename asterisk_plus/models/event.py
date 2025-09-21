@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
-
-from odoo import models, fields, api
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
+from odoo import models, fields, api, _
 
 
 class Event(models.Model):
@@ -28,7 +28,7 @@ class Event(models.Model):
     _sql_constraints = [
         ('event_uniq',
          'check(1=1)',
-         'Should be remove in next pre-upgrade script.')
+         _('Should be remove in next pre-upgrade script.'))
     ]
 
     def _get_icon(self):

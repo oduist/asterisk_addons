@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 import re
-from odoo import models, fields, api, tools, release, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release, release, SUPERUSER_ID, _
 from odoo.exceptions import ValidationError, UserError
 from passlib import pwd
 from random import choice
@@ -47,11 +47,11 @@ class PbxUser(models.Model):
     originate_vars = fields.Text(string='Channel Variables')
     open_reference = fields.Boolean(
         default=True,
-        help='Open reference form on incoming calls.')
+        help=_('Open reference form on incoming calls.'))
     user_call_count = fields.Integer(compute='_get_call_count', string='Calls')
     missed_calls_notify = fields.Boolean(
         default=True,
-        help='Notify user on missed calls.')
+        help=_('Notify user on missed calls.'))
     call_popup_is_enabled = fields.Boolean(
         default=True,
         string='Call Popup')
@@ -64,24 +64,24 @@ class PbxUser(models.Model):
 
     _sql_constraints = [
         ('exten_uniq', 'unique (exten,server)',
-         'This phone extension is already used!'),
+         _('This phone extension is already used!')),
         ('user_uniq', 'unique ("user",server)',
-         'This user is already defined!'),
+         _('This user is already defined!')),
     ]
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        pbx_users = super(PbxUser, self).create(vals_list)
-        if pbx_users and not self.env.context.get('no_clear_cache'):
+    @api.model
+    def create(self, vals):
+        pbx_user = super(PbxUser, self).create(vals)
+        if pbx_user and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
                 self.env.registry.clear_cache()
             else:
                 self.clear_caches()
-        for pbx_user in pbx_users:
-            if pbx_user.user and not pbx_user.user.has_group('asterisk_plus.group_asterisk_user'):
-                group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
-                group_asterisk_user.write({'users': [(4, pbx_user.user.id)]})
-        return pbx_users
+
+        if pbx_user.user and not pbx_user.user.has_group('asterisk_plus.group_asterisk_user'):
+            group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
+            group_asterisk_user.write({'users': [(4, pbx_user.user.id)]})
+        return pbx_user
 
     def write(self, vals):
         if not (self.env.user.has_group(
@@ -91,14 +91,9 @@ class PbxUser(models.Model):
             restricted_fields = set(vals.keys()) - set(USER_PERMITTED_FIELDS)
             if restricted_fields:
                 raise ValidationError(
-                    'Fields {} not allowed to be changed by user!'.format(
+                    _('Fields {} not allowed to be changed by user!').format(
                         ', '.join(restricted_fields)))
-        group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
-        if 'user' in vals.keys():
-            group_asterisk_user.with_context(install_mode=True).write({'users': [(3, self.user.id)]})
         user = super(PbxUser, self).write(vals)
-        if 'user' in vals.keys() and not self.user.has_group('asterisk_plus.group_asterisk_user'):
-            group_asterisk_user.write({'users': [(4, self.user.id)]})
         if user and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
                 self.env.registry.clear_cache()
@@ -107,8 +102,6 @@ class PbxUser(models.Model):
         return user
 
     def unlink(self):
-        group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
-        group_asterisk_user.with_context(install_mode=True).write({'users': [(3, self.user.id)]})
         res = super(PbxUser, self).unlink()
         if res and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
@@ -153,7 +146,8 @@ class PbxUser(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'asterisk_plus.user',
                 'name': 'Users',
-                'view_mode': 'tree,form' if release.version_info[0] <= 17 else 'list,form',
+                'view_mode': 'tree,form',
+                'view_type': 'form',
                 'target': 'current',
             }
         else:
@@ -165,6 +159,7 @@ class PbxUser(models.Model):
                 'res_id': self.env.user.asterisk_users.id,
                 'name': 'User',
                 'view_mode': 'form',
+                'view_type': 'form',
                 'target': 'current',
             }
 
@@ -226,9 +221,9 @@ class PbxUser(models.Model):
         # Used from the user calls view button.
         self.ensure_one()
         return {
-            'name': "Calls",
+            'name': _("Calls"),
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree' if release.version_info[0] <= 17 else 'list',
+            'view_mode': 'tree',
             'res_model': 'asterisk_plus.call',
             'domain': ['|', ('calling_user', '=', self.user.id),
                             ('answered_user', '=', self.user.id)],
@@ -247,11 +242,51 @@ class PbxUser(models.Model):
 
     @api.model
     def fagi_request(self, request):
-        logger.info('FAGI request! [REQUIRED ENTERPRISE]')
-        return []
+        debug(self, 'AGI request: {}'.format(request))
+        extension = request['agi_extension']
+        agi_channel = request['agi_channel']
+        channel = re.search('^(?P<channel>.+)-.+$', agi_channel).groupdict().get('channel')
+        callerid = request['agi_callerid']
+        # Find destination users by personal number or exten
+        users = self.env['asterisk_plus.user'].search(
+            ['|', ('did_number', '=', extension), ('exten', '=', extension)])
+        endpoints = []
+        if len(users) == 1:
+            user = users[0]
+            debug(self, 'Found PBX user {} by phone {}'.format(user.name, extension))
+            for channel in users.channels:
+                endpoint = channel.name.split('/')[1]
+                endpoints.append(endpoint)
+            res = []
+            if user.record_calls:
+                now = datetime.now()
+                year = now.year
+                month = now.month
+                day = now.day
+                res.append('EXEC MIXMONITOR {}/{}/{}/{}.wav,b'.format(year, month, day, request['agi_uniqueid']))
+            res.append('PJSIP_DIAL_CONTACTS {} {},t'.format(','.join(endpoints), user.dial_timeout))
+            return res
+        elif len(users) > 1:
+            # Multiple users, no voicemail
+            debug(self, 'Found many users {} by phone {}'.format(
+                [k.name for k in users], extension))
+            for user in users:
+                for channel in users.channels:
+                    endpoint = channel.name.split('/')[1]
+                    endpoints.append(endpoint)
+            return [
+                'EXEC VERBOSE "Muliple users by number {} found."'.format(extension),
+                'PJSIP_DIAL_CONTACTS {} {},t'.format(','.join(endpoints),user.dial_timeout)
+            ]
+        else:
+            debug(self, 'No PBX user by number %s found.' % extension)
+            return []
 
     def apply_sip_peers(self):
-        self.env['asterisk_plus.settings'].asterisk_plus_notify('Enterprise Feature')
-
+        # Send a message to Agent to download SIP peers
+        if self.server.generate_sip_peers:
+            self.server.local_job(fun='sip.get_peers', args=self.server.id, res_notify_uid=self.env.uid)
+        else:
+            raise ValidationError('SIP peers generation not enabled!')
 
 

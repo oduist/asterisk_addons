@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 from datetime import datetime, timedelta
 import json
 import logging
-from odoo import models, fields, api, tools, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from .settings import debug
 from .server import get_default_server, SIP_TRANSPORT_SELECTION
@@ -19,6 +19,7 @@ USER_PERMITTED_FIELDS = [
 #: a call to user (1-st call leg) and after user answered his phone the 2-nd call leg
 #: is originated to the partner number. It is possible to auto answer the 1-st leg using
 #: special channel headers. Different phones use different headers.
+#: https://docs.odoopbx.com/user_guide/auto_answer.html
 AUTO_ANSWER_HEADERS = [
     ('Alert-Info:answer-after=0', 'Alert-Info:answer-after=0'),
     ('Alert-Info: Info=Alert-Autoanswer', 'Alert-Info: Info=Alert-Autoanswer'),
@@ -64,7 +65,7 @@ class UserChannel(models.Model):
 
     _sql_constraints = [
         ('server_channel_uniq', 'unique (server,name)',
-         'The channel is already defined for this server!'),
+         _('The channel is already defined for this server!')),
     ]
 
     def write(self, values):
@@ -75,7 +76,7 @@ class UserChannel(models.Model):
             restricted_fields = set(values.keys()) - set(USER_PERMITTED_FIELDS)
             if restricted_fields:
                 raise ValidationError(
-                    'Fields {} not allowed to be changed by user!'.format(
+                    _('Fields {} not allowed to be changed by user!').format(
                         ', '.join(restricted_fields)))
         res = super(UserChannel, self).write(values)
         return res
@@ -98,7 +99,7 @@ class UserChannel(models.Model):
                 chan, name = rec.name.split('/')
             except ValueError:
                 raise ValidationError(
-                    'Bad channel format. Example: PJSIP/101.')
+                    _('Bad channel format. Example: PJSIP/101.'))
             if ' ' in rec.name:
                 raise ValidationError('Spaces are not allowed!')
 

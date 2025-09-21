@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*
-
+# ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 from datetime import datetime, timedelta
 import time
 import json
 import logging
-from odoo import models, fields, api, tools, release
+from odoo import models, fields, api, tools, release, _
 from odoo.exceptions import ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .settings import debug
@@ -63,7 +63,8 @@ class Channel(models.Model):
     #: Channel name. E.g. SIP/1001-000000bd.
     channel = fields.Char(index=True)
     #: Shorted channel to compare with user's channel as it is defined. E.g. SIP/1001
-    channel_short = fields.Char(compute='_get_channel_short', string='Chan')
+    channel_short = fields.Char(compute='_get_channel_short',
+                                string=_('Chan'))
     #: Parent channel
     parent_channel = fields.Many2one('asterisk_plus.channel', compute='_get_parent_channel')
     #: Channel unique ID. E.g. asterisk-1631528870.0
@@ -79,7 +80,7 @@ class Channel(models.Model):
     #: Channel's current state.
     state = fields.Char(size=80, string='State code')
     #: Channel's current state description.
-    state_desc = fields.Char(size=256, string='State')
+    state_desc = fields.Char(size=256, string=_('State'))
     #: Channel extension.
     exten = fields.Char(size=32)
     #: Caller ID number.
@@ -150,16 +151,15 @@ class Channel(models.Model):
                 'action': 'reload_view',
                 'model': 'asterisk_plus.channel'
             }
-            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+            self.env['bus.bus'].sendone('odoopbx_actions', json.dumps(msg))
         else:
             msg = {
                 'model': 'asterisk_plus.channel'
             }
             self.env['bus.bus']._sendone(
-                'asterisk_plus_actions',
+                'odoopbx_actions',
                 'reload_view',
-                msg
-            )
+                json.dumps(msg))
 
     def update_call_partner(self, channel, country=None):
         if channel.call.partner:
@@ -189,6 +189,14 @@ class Channel(models.Model):
             partner_id = channel.env['res.partner'].get_partner_by_number(
                 channel.exten, country=country)['id']
             debug(self, 'Partner %s from exten %s' % (partner_id, channel.exten))
+        # Check if auto create partners is set & create partner.
+        if channel.call.direction == 'in' and not partner_id and channel.env['asterisk_plus.settings'].get_param('auto_create_partners'):
+            partner_number = channel.exten if channel.call.direction == 'out' else channel.callerid_num
+            partner_id = channel.env['res.partner'].with_context(tracking_disable=True).sudo().create({
+                'name': partner_number,
+                'phone': partner_number,
+            }).id
+            debug(channel, 'Call {} auto create partner id {}'.format(channel.call.id, partner_id))
         if partner_id:
             debug(self, 'Setting partner %s for call %s' % (partner_id, channel.call.id))
             channel.call.partner = partner_id
@@ -264,8 +272,8 @@ class Channel(models.Model):
         debug(self, '{} id {} user {} country {}'.format(
             event['Channel'], channel.mapped('id'), channel.user.id, country
         ))
-        if channel.no_call or channel.exten == '*8':
-            # Special case not to create a call for the channel or call pickup case.
+        if channel.no_call:
+            # Special case not to create a call for the channel.
             self.reload_channels()
             return (channel.id, '{} Newchannel ACK'.format(event['Channel']))
         """
@@ -437,9 +445,8 @@ class Channel(models.Model):
         channel.write(data)
         # There is no sense to go ahead if it's impossible to find the call
         if not channel.no_call and not channel.call:
-            if channel.exten != '*8': # Ommit message on call pickup.
-                debug(channel, '{} id {} failed to match a call'.format(
-                        event['Channel'], channel.id), level='error')
+            debug(channel, '{} id {} failed to match a call'.format(
+                    event['Channel'], channel.id), level='error')
             return (channel.id, '{} failed to match a call'.format(event['Channel']))
         # Append an entry to call's events
         if channel.call:
@@ -468,16 +475,6 @@ class Channel(models.Model):
                             event['Channel'], self.env.user.asterisk_server).user
                     if user:
                         call_data['answered_user'] = user.id
-            # Primary channel, channel without call is ignored.
-            elif channel.call.uniqueid == channel.uniqueid:
-                # Ignore answer on primary channel.
-                if len(channel.call.channels) > 1:
-                    if channel.state_desc == 'Up' and channel.call.status != 'answered':
-                        # "Answer" channel. Added when call pickup support was added.
-                        call_data.update({
-                            'status': 'answered',
-                            'answered': convert_unixtime(event.get('EventTime'))
-                        })
             debug(channel,'Call {} update: {}'.format(channel.call.id, call_data))
             channel.call.write(call_data)
         return (channel.id, '{} Newstate ACK'.format(event['Channel']))
@@ -557,9 +554,6 @@ class Channel(models.Model):
                 'call': channel.call.id,
                 'event': 'Channel {} hangup'.format(channel.channel_short),
             })
-        elif channel.parent_channel.call:
-            # Link the channel to the parent call by linked channel (used in call pickup *8).
-            channel.call = channel.parent_channel.call
         # Commit changes before trying to get recording
         self.env.cr.commit()
         self.reload_channels()
@@ -594,8 +588,8 @@ class Channel(models.Model):
             reason = 'Calling user SIP phone is not registered or call declined.'
         # Notify user on a failed click to dial.
         if channel.call and channel.call.model and channel.call.res_id:
-            self.env['asterisk_plus.settings'].asterisk_plus_notify(
-                'Call failed, reason: {0}'.format(reason),
+            self.env['asterisk_plus.settings'].odoopbx_notify(
+                _('Call failed, reason: {0}').format(reason),
                 notify_uid=channel.create_uid.id, warning=True)
         return channel.id
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="asterisk_plus_server_hr_employee_access" model="ir.model.access">
+        <field name="name">asterisk_plus_server_hr_employe_access</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="group_id" ref="asterisk_plus.group_asterisk_server"/>
+    </record>
+
+</odoo>

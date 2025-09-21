@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+
+      <record id="new_exten_mixmonitor_filename" model="asterisk_plus.event">
+        <field name="name">Newexten</field>
+        <field name="source">AMI</field>
+        <field name="delay">0</field>
+        <field name="model">asterisk_plus.recording</field>
+        <field name="method">on_gs_new_exten_mixmonitor_filename</field>
+        <field name="condition">event['Exten'] == 'StartMonitor' and '/asterisk/var/spool/asterisk/monitor/' in event.get('AppData', '')</field>
+      </record>
+  
+    </data>
+</odoo>

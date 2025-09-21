@@ -1,3 +1,0 @@
-<odoo>
-    <function model="asterisk_plus.settings" name="set_instance_uid"/>
-</odoo>

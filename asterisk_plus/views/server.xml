@@ -20,7 +20,7 @@
       <field name="arch" type="xml">
           <form create="false">
               <header>
-                  <button type="object" string="Reload" class="btn-primary"
+                  <button type="object" string="Reload" class="btn-primary" 
                       icon="fa-refresh" name="reload_action"/>
                   <button type="object" string="Agent Ping"
                       icon="fa-check" name="ping_agent"/>
@@ -33,14 +33,12 @@
               </header>
               <sheet>
                 <field name="is_module_update" invisible="1"/>
-                <widget name="web_ribbon" text="New version available!" bg_color="bg-primary"
-                        invisible="is_module_update != True"/>
                 <div class="oe_button_box" name="button_box">
                 </div>
                 <div class="oe_title" name="title">
                   <label for="name" class="oe_edit_only"/>
                   <h1><field name="name"/></h1>
-                  <div invisible="is_module_update != True">
+                  <div attrs="{'invisible': [('is_module_update', '!=', True)]}">
                     <small><field name="market_download_link" nolabel="1"/></small>
                   </div>
                 </div>
@@ -57,38 +55,30 @@
                       <group>
                         <field name="permit_agent_initialization" widget="boolean_toggle"/>
                         <field name="agent_initialized" widget="boolean_toggle"/>
-                        <field name="agent_url"/>
-                        <field name="agent_token" password="1"/>
                       </group>
                     </group>
                     <group>
                       <field name="agent_options">
-                        <list editable="bottom">
+                        <tree editable="bottom">
                           <field name="key"/>
                           <field name="value"/>
-                        </list>
+                        </tree>
                       </field>
                     </group>
                   </page>
                   <page name="settings" string="SIP Users">
                     <group>
                       <group>
-                        <field name="auto_create_pbx_users" readonly="1" help="Enterprise Feature"/>
-                        <field name="sip_peer_start_exten"
-                               invisible="auto_create_pbx_users == False"/>
-                        <field name="generate_sip_peers" readonly="1" help="Enterprise Feature"/>
-                        <field name="sip_peer_transport"
-                               invisible="generate_sip_peers == False"/>
-                        <field name="sip_protocol"
-                               invisible="generate_sip_peers == False"/>
-                        <field name="security_token"
-                               invisible="generate_sip_peers == False"/>
+                        <field name="auto_create_pbx_users"/>
+                        <field name="sip_peer_start_exten" attrs="{'invisible': [('auto_create_pbx_users', '=', False)]}"/>
+                        <field name="generate_sip_peers"/>
+                        <field name="sip_peer_transport" attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
+                        <field name="sip_protocol" attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
+                        <field name="security_token" attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
                       </group>
                       <group>
-                        <field name="sip_peer_template"
-                               invisible="generate_sip_peers == False"/>
-                        <field name="sip_templates"
-                               invisible="generate_sip_peers == False"/>
+                        <field name="sip_peer_template" attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
+                        <field name="sip_templates" attrs="{'invisible': [('generate_sip_peers', '=', False)]}"/>
                       </group>
                     </group>
                   </page>
