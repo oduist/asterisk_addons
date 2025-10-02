@@ -179,18 +179,35 @@ class Settings(models.Model):
     installation_date = fields.Datetime(compute='_get_instance_data')
     module_version = fields.Char(compute='_get_instance_data')
     odoo_version = fields.Char(compute='_get_instance_data')
-    admin_name = fields.Char(compute='_get_instance_data')
-    admin_phone = fields.Char(compute='_get_instance_data')
-    admin_email = fields.Char(compute='_get_instance_data')
-    company_name = fields.Char(compute='_get_instance_data')
-    company_email = fields.Char(compute='_get_instance_data')
-    company_phone = fields.Char(compute='_get_instance_data')
-    company_country = fields.Char(compute='_get_instance_data')
-    company_state_name = fields.Char(compute='_get_instance_data')
-    company_country_code = fields.Char(compute='_get_instance_data')
-    company_country_name = fields.Char(compute='_get_instance_data')
-    company_city = fields.Char(compute='_get_instance_data')
+    admin_name = fields.Char()
+    admin_phone = fields.Char()
+    admin_email = fields.Char()
+    company_name = fields.Char()
+    company_email = fields.Char()
+    company_phone = fields.Char()
+    company_country = fields.Many2one('res.country')
+    company_state_name = fields.Many2one('res.country.state', domain="[('country_id', '=?', company_country)]")
+    company_country_code = fields.Char()
+    company_country_name = fields.Char()
+    company_city = fields.Char()
     web_base_url = fields.Char(compute='_get_instance_data', string='Odoo URL')
+
+    def set_default_admin_and_company(self):
+        self.company_email = self.env.user.company_id.email
+        self.company_name = self.env.user.company_id.name
+        self.company_phone = self.env.user.company_id.phone
+        self.company_country = self.env.user.company_id.country_id
+        self.company_city = self.env.user.company_id.city
+        self.company_state_name = self.env.user.company_id.partner_id.state_id
+        self.admin_name = self.env.user.partner_id.name
+        self.admin_email = self.env.user.partner_id.email
+        self.admin_phone = self.env.user.partner_id.phone
+
+    def read(self, fields_to_read, load='_classic_read'):
+        if not self.admin_name:
+            self.set_default_admin_and_company()
+        res = super(Settings, self).read(fields_to_read, load=load)
+        return res
 
     def _get_instance_data(self):
         module = self.env['ir.module.module'].sudo().search([('name', '=', 'asterisk_plus')])
@@ -207,17 +224,6 @@ class Settings(models.Model):
             rec.api_url = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.api_url')
             rec.api_fallback_url = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.api_fallback_url')
             rec.registration_key = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.registration_key')
-            rec.company_email = self.env.user.company_id.email
-            rec.company_name = self.env.user.company_id.name
-            rec.company_phone = self.env.user.company_id.phone
-            rec.company_country = self.env.user.company_id.country_id.name
-            rec.company_city = self.env.user.company_id.city
-            rec.company_country_code = self.env.user.company_id.country_id.code
-            rec.company_country_name = self.env.user.company_id.country_id.name
-            rec.company_state_name = self.env.user.company_id.partner_id.state_id.name
-            rec.admin_name = self.env['res.users'].browse(ADMIN_USER_ID).partner_id.name
-            rec.admin_email = self.env['res.users'].browse(ADMIN_USER_ID).partner_id.email
-            rec.admin_phone = self.env['res.users'].browse(ADMIN_USER_ID).partner_id.phone
             rec.web_base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
             rec.registration_number = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.registration_number')
 
@@ -277,13 +283,15 @@ class Settings(models.Model):
         self.set_param('is_registered', True)
 
     def prepare_registration_data(self):
+        company_country = self.get_param("company_country")
+        company_state_name = self.get_param("company_state_name")
         return {
             'instance_uid': self.get_param('instance_uid'),
             'company_name': self.get_param('company_name'),
-            'company_country': self.get_param('company_country'),
-            'company_state_name': self.get_param('company_state_name'),
-            'company_country_code': self.get_param('company_country_code'),
-            'company_country_name': self.get_param('company_country_name'),
+            "company_country": company_country.name if company_country else False,
+            "company_state_name": company_state_name.name if company_state_name else False,
+            "company_country_code": company_country.code if company_country else False,
+            "company_country_name": company_country.name if company_country else False,
             'company_email': self.get_param('company_email'),
             'company_city': self.get_param('company_city'),
             'company_phone': self.get_param('company_phone'),
@@ -297,29 +305,6 @@ class Settings(models.Model):
             'url': self.get_param('web_base_url'),
             'installation_date': self.get_param('installation_date').strftime("%Y-%m-%d"),
             'customer_code': self.get_param('customer_code'),
-        }
-
-    def update_company_data_button(self):
-        main_company = self.env.company
-        if not main_company:
-            raise UserError("No main company found.")
-        return {
-            'type': 'ir.actions.act_window',
-            'name': main_company.name,
-            'res_model': 'res.company',
-            'view_mode': 'form',
-            'res_id': main_company.id,
-            'target': 'new',
-        }
-
-    def update_admin_data_button(self):
-        return {
-            'type': 'ir.actions.act_window',
-            'name': self.env.user.partner_id.name,
-            'res_model': 'res.partner',
-            'view_mode': 'form',
-            'res_id': self.env.user.partner_id.id,
-            'target': 'new',
         }
 
     @api.model
