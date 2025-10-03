@@ -164,16 +164,17 @@
                             </p>
                             <img alt="Great support!" colspan="2" src="/asterisk_plus/static/description/support.jpg" width="100%"/>
                         </group>
-                        <group name="registration_data" string="Registration Data" invisible="is_registered">
-                            <field name="company_name" attrs="{'required': 1}"/>
-                            <field name="company_email" attrs="{'required': 1}"/>
-                            <field name="company_phone" attrs="{'required': 1}"/>
-                            <field name="company_country" attrs="{'required': 1}"/>
+                        <group name="registration_data" string="Registration Data"
+                               attrs="{'invisible': [('is_registered', '=', True)]}">
+                            <field name="company_name" attrs="{'required': True}"/>
+                            <field name="company_email" attrs="{'required': True}"/>
+                            <field name="company_phone" attrs="{'required': True}"/>
+                            <field name="company_country" attrs="{'required': True}"/>
                             <field name="company_state_name" string="Company State"/>
-                            <field name="company_city" attrs="{'required': 1}"/>
-                            <field name="admin_name" attrs="{'required': 1}"/>
-                            <field name="admin_email" attrs="{'required': 1}"/>
-                            <field name="admin_phone" attrs="{'required': 1}"/>
+                            <field name="company_city" attrs="{'required': True}"/>
+                            <field name="admin_name" attrs="{'required': True}"/>
+                            <field name="admin_email" attrs="{'required': True}"/>
+                            <field name="admin_phone" attrs="{'required': True}"/>
                             <field name="web_base_url"/>
                         </group>
                     </group>
