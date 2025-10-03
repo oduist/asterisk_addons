@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+
+      <record id="yeastar_cdr" model="asterisk_plus.event">
+        <field name="name">Cdr</field>
+        <field name="source">AMI</field>
+        <field name="delay">2</field>
+        <field name="model">asterisk_plus.recording</field>
+        <field name="method">on_yeastar_cdr</field>
+      </record>
+  
+    </data>
+</odoo>  
