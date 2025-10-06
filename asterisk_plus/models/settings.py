@@ -169,6 +169,8 @@ class Settings(models.Model):
     summary_prompt = fields.Text(required=True, default='Summarise this phone call')
     register_summary = fields.Boolean(help='Register summary at partner of reference chat.')
     remove_recording_after_transcript = fields.Boolean()
+    openai_api_key = fields.Char()
+    openai_api_key_display = fields.Char()
     #############  BILLING FIELDS   ###############################################
     region = fields.Selection(
         [('eu-central-1', 'Europe')],
@@ -610,6 +612,10 @@ class Settings(models.Model):
         return super(Settings, self).create(vals)
 
     def write(self, vals):
+        if vals.get('openai_api_key_display'):
+            # Hide API key from WEB.
+            vals['openai_api_key'] = vals['openai_api_key_display']
+            vals['openai_api_key_display'] = '*' * 24
         if release.version_info[0] >= 17:
             self.env.registry.clear_cache()
         else:

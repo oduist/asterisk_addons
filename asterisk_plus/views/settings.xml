@@ -178,6 +178,7 @@
                     <group>
                       <field name="transcript_calls"/>
                       <field name="summary_prompt"/>
+                      <field name="openai_api_key_display" string="OpenAI API Key" password="1"/>
                       <field name="register_summary"
                         attrs="{'invisible': [('transcript_calls', '=', False)]}"/>
                       <field name="remove_recording_after_transcript"

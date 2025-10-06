@@ -371,6 +371,7 @@ class Recording(models.Model):
         try:
             data = self.prepare_transcription_content()
             data.update({
+                'customer_openai_key': self.env['%s.settings' % MODULE_NAME].sudo().get_param('openai_api_key'),
                 'summary_prompt': self.env['%s.settings' % MODULE_NAME].sudo().get_param('summary_prompt'),
                 'callback_url': urljoin(
                     self.env['asterisk_plus.settings'].sudo().get_param('web_base_url'),
