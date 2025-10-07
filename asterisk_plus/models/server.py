@@ -17,7 +17,8 @@ else:
     from urlparse import urljoin
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import uuid
-from odoo import api, models, fields, SUPERUSER_ID, registry, release, tools, release
+from odoo import api, models, fields, release, tools, release
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
 from .settings import debug
 from .res_partner import strip_number, format_number

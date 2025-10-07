@@ -3,14 +3,15 @@
 import json
 import logging
 import uuid
-from odoo import http, SUPERUSER_ID, registry, release
-from odoo.api import Environment
-from werkzeug.exceptions import BadRequest, NotFound
+
+from odoo import http, release
+from odoo.api import Environment, SUPERUSER_ID
 from odoo.modules.registry import Registry
 
 if release.version_info[0] > 17:
     registry = Registry
-
+else:
+    from odoo import registry
 logger = logging.getLogger(__name__)
 
 MODULE_NAME = 'asterisk_plus'

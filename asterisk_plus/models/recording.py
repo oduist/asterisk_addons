@@ -6,7 +6,8 @@ import time
 from urllib.parse import urljoin, quote
 import uuid
 import logging
-from odoo import models, fields, api, tools, release, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release, release
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from .server import debug
 from .settings import RECORDING_ACCESS_SELECTION

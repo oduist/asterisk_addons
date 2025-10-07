@@ -3,7 +3,8 @@
 from datetime import datetime, timedelta
 import json
 import logging
-from odoo import models, fields, api, tools, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from .settings import debug
 from .server import get_default_server, SIP_TRANSPORT_SELECTION

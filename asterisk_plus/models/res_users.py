@@ -28,7 +28,7 @@ class ResUser(models.Model):
                 self.env['asterisk_plus.user'].auto_create(user)
         return users
 
-    @api.constrains('groups_id')
+    @api.constrains('group_ids')
     def _manage_pbx_users(self):
         if self.env.context.get('install_mode'):
             return

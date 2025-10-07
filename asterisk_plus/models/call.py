@@ -7,7 +7,8 @@ import pytz
 import uuid
 import phonenumbers
 import time
-from odoo import models, fields, api, tools, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .settings import debug

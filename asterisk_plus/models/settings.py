@@ -187,8 +187,6 @@ class Settings(models.Model):
     company_phone = fields.Char()
     company_country = fields.Many2one('res.country')
     company_state_name = fields.Many2one('res.country.state', domain="[('country_id', '=?', company_country)]")
-    company_country_code = fields.Char()
-    company_country_name = fields.Char()
     company_city = fields.Char()
     web_base_url = fields.Char(compute='_get_instance_data', string='Odoo URL')
 

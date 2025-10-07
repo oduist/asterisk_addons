@@ -61,6 +61,8 @@ class Partner(models.Model):
         'Every # adds 1 second pause. Example: ###1001'))
     call_count = fields.Integer(compute='_get_call_count', string='Calls')
     recorded_calls = fields.One2many('asterisk_plus.recording', 'partner')
+    if release.version_info[0] >= 19:
+        mobile = fields.Char()
 
     @api.model_create_multi
     def create(self, vals_list):

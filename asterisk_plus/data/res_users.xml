@@ -3,7 +3,7 @@
     <record id="user_asterisk1" model="res.users" context="{'no_reset_password': True}">
         <field name="login">asterisk1</field>
         <field name="name">Asterisk 1</field>
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_portal'), ref('asterisk_plus.group_asterisk_server')])]"/>
+        <field name="group_ids" eval="[Command.link(ref('base.group_portal')), Command.link(ref('asterisk_plus.group_asterisk_server')), ]"/>
         <field name="tz">Etc/GMT</field>
         <field name="country_id" ref="base.be"/>
         <field name="email">admin@example.com</field>

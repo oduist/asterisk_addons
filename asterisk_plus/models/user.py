@@ -1,14 +1,22 @@
 from datetime import datetime
 import logging
 import re
-from odoo import models, fields, api, tools, release, release, SUPERUSER_ID
+from odoo import models, fields, api, tools, release, release
+from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
-from passlib import pwd
 from random import choice
 from .server import get_default_server
 from .settings import debug
+import secrets
+import string
 
 logger = logging.getLogger(__name__)
+
+
+def genword(length=None):
+    length = length or choice(range(12, 16))
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
 #: Fields allowed to be changed by user.
@@ -210,7 +218,7 @@ class PbxUser(models.Model):
                 'server': server.id,
                 'asterisk_user': asterisk_user.id,
                 'sip_user': sip_user,
-                'sip_password': pwd.genword(length=choice(range(12,16))),
+                'sip_password': genword(),
             })
             debug(self, 'Create sip_user {} id {} for {}'.format(user_channel.sip_user, user_channel.id, user.login))
             next_extension += 1

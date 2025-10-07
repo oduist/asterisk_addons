@@ -1,5 +1,6 @@
 import logging
-from odoo import api, SUPERUSER_ID
+from odoo import api
+from odoo.api import SUPERUSER_ID
 from odoo.tools.sql import rename_column
 
 logger = logging.getLogger(__name__)
