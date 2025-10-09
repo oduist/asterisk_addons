@@ -161,20 +161,20 @@
                               <a role="button" class="btn btn-info" href="https://oduist.com/forum/user-support-portal-1" target="_new">FREE SUPPORT</a> |
                               <a role="button" class="btn btn-success" href="https://oduist.com/support" target="_new">COMMERCIAL SUPPORT</a>
                             </p>
-                            <img alt="Great support!" colspan="2" src="/asterisk_plus/static/description/support.jpg" width="100%"/>
+                            <img alt="Great support!" colspan="2" src="/asterisk_plus/static/description/support.png" width="100%"/>
                         </group>
-                        <group name="registration_data" string="Registration Data"
-                               attrs="{'invisible': [('is_registered', '=', True)]}">
-                            <field name="company_name" attrs="{'required': True}"/>
-                            <field name="company_email" attrs="{'required': True}"/>
-                            <field name="company_phone" attrs="{'required': True}"/>
-                            <field name="company_country" attrs="{'required': True}"/>
-                            <field name="company_state_name" string="Company State"/>
-                            <field name="company_city" attrs="{'required': True}"/>
-                            <field name="admin_name" attrs="{'required': True}"/>
-                            <field name="admin_email" attrs="{'required': True}"/>
-                            <field name="admin_phone" attrs="{'required': True}"/>
-                            <field name="web_base_url"/>
+                        <group name="registration_data" string="Registration Data">
+                          <field name="company_name"/>
+                          <field name="company_country"/>
+                          <field name="admin_name"/>
+                          <field name="admin_email"/>
+                          <field name="admin_phone"/>
+                          <field name="web_base_url"
+                                 attrs="{'invisible': [('is_registered', '=', True)]}"/>
+                          <button class="btn btn-primary" colspan="2" name="action_open_system_parameters" type="object" string="Change Odoo URL"
+                                  attrs="{'invisible': [('is_registered', '=', True)]}"/>
+                          <button colspan="2" name="update_instance_registration" class="btn btn-primary btn-lg me-1" type="object" string="UPDATE REGISTRATION"
+                                  attrs="{'invisible': [('is_registered', '=', False)]}"/>
                         </group>
                     </group>
                 </page>
