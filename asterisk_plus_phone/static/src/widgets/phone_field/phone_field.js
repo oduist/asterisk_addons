@@ -23,7 +23,9 @@ patch(PhoneField.prototype, "asterisk_plus_phone.PhoneField", {
             let props = {phone: this.props.record.data[this.props.name]}
             this.mainPhone.props.bus.trigger('busPhoneMakeCall', props)
         } else {
-            super._onClickCallButton(e)
+            const {resModel, data} = this.props.record
+            const args = [this.props.value, resModel, data.id]
+            this.env.model.orm.call("asterisk_plus.server", "originate_call", args, {})
         }
     }
 })
