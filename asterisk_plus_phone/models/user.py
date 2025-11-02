@@ -20,6 +20,8 @@ class User(models.Model):
     )
     mask_call_number = fields.Boolean(default=False)
     sip_auth_user_enabled = fields.Boolean(compute="_get_sip_auth_user_enabled")
+    originate_type = fields.Selection(
+        selection=[('server', 'Server'), ('client', 'Client')], default='client', required=True)
 
     def _get_sip_auth_user_enabled(self):
         sip_auth_user_enabled = (
