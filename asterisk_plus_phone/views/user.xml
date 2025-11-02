@@ -20,6 +20,7 @@
                 <field name="phone_ring_volume" help="Phone ring volume in %, from 0 to 100."/>
                 <field name="mask_call_number" groups="asterisk_plus.group_asterisk_admin"/>
                 <field name="sip_auth_user_enabled"/>
+                <field name="originate_type"/>
             </field>
         </field>
     </record>
