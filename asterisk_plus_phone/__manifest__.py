@@ -5,7 +5,7 @@
     'description': """Make and receive calls from Odoo.""",
     'currency': 'EUR',
     'price': '0',
-    'version': '1.9.2',
+    'version': '1.9.3',
     'category': 'Phone',
     'author': 'Oduist',
     'license': 'Other proprietary',
