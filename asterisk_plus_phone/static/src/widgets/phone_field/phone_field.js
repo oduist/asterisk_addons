@@ -1,31 +1,39 @@
 /** @odoo-module **/
-"use strict"
-
-import {patch} from "@web/core/utils/patch"
-import {PhoneField} from "@web/views/fields/phone/phone_field"
-import {session} from "@web/session"
+import basic_fields from 'web.basic_fields'
 import {registry} from "@web/core/registry"
+import {uid} from "web.session"
 
-patch(PhoneField.prototype, "asterisk_plus_phone.PhoneField", {
-    setup() {
-        this._super.apply()
+const Phone = basic_fields.FieldPhone
+
+Phone.include({
+
+    init() {
+        this._super.apply(this, arguments)
+        this.enableCall = 'enable_call' in this.attrs.options ? this.attrs.options.enable_call : true
+        this.attrs.options.enable_call = this.enableCall
         this.mainPhone = registry.category("main_components").get('mainPhone', null)
     },
 
-    async _onClickCallButton(e) {
-        e.preventDefault()
-        const [asterisk_user] = await this.env.model.orm.searchRead(
-            'asterisk_plus.user',
-            [["user", "=", session.uid]],
-            ["originate_type"]
-        )
+    _onClickPhone: async function (ev) {
+        ev.preventDefault()
+        ev.stopPropagation()
+
+        const [asterisk_user] = await this._rpc({
+            model: 'asterisk_plus.user',
+            method: 'search_read',
+            args: [[["user", "=", uid]], ['id', 'originate_type']],
+        })
+
         if (this.mainPhone && asterisk_user && asterisk_user.originate_type === 'client') {
-            let props = {phone: this.props.record.data[this.props.name]}
+            let props = {phone: this.value}
             this.mainPhone.props.bus.trigger('busPhoneMakeCall', props)
         } else {
-            const {resModel, data} = this.props.record
-            const args = [this.props.value, resModel, data.id]
-            this.env.model.orm.call("asterisk_plus.server", "originate_call", args, {})
+            return this._rpc({
+                model: 'asterisk_plus.server',
+                method: 'originate_call',
+                args: [this.value, this.model, parseInt(this.res_id)],
+            })
         }
-    }
+    },
+
 })
