@@ -433,6 +433,10 @@ export class Phone extends Component {
 
     async prepareCall(props) {
         if (!this.state.inCall) {
+            if (!this.sipRegistered) {
+                this.notify('Not registered to the SIP server!', {title: 'Phone', sticky: false})
+                return
+            }
             this.state.isContactList = false
             this.state.callPhoneNumber = props.phone
             await this.searchPartner(props.phone)
