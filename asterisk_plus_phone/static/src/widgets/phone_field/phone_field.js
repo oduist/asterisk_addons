@@ -20,7 +20,7 @@ patch(PhoneField.prototype, "asterisk_plus_phone.PhoneField", {
             ["originate_type"]
         )
         if (this.mainPhone && asterisk_user && asterisk_user.originate_type === 'client') {
-            let props = {phone: this.props.record.data[this.props.name]}
+            let props = {phone: this.props.value}
             this.mainPhone.props.bus.trigger('busPhoneMakeCall', props)
         } else {
             const {resModel, data} = this.props.record
