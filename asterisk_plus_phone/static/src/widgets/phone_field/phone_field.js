@@ -3,7 +3,7 @@
 
 import {patch} from "@web/core/utils/patch"
 import {PhoneField} from "@web/views/fields/phone/phone_field"
-import {user} from "@web/core/user"
+import {session} from "@web/session"
 import {registry} from "@web/core/registry"
 
 patch(PhoneField.prototype, {
@@ -17,7 +17,7 @@ patch(PhoneField.prototype, {
         e.preventDefault()
         const [asterisk_user] = await this.env.model.orm.searchRead(
             'asterisk_plus.user',
-            [["user", "=", user.userId]],
+            [["user", "=", session.uid]],
             ["originate_type"]
         )
         if (asterisk_user && asterisk_user.originate_type === 'client') {
