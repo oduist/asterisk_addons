@@ -32,6 +32,7 @@
     'demo': [],
     'assets': {
         'web.assets_backend': [
+            '/asterisk_plus_phone/static/src/widgets/phone_field/*',
             '/asterisk_plus_phone/static/src/icomoon/style.css',
             '/asterisk_plus_phone/static/src/js/utils.js',
             '/asterisk_plus_phone/static/src/components/tray/*',
