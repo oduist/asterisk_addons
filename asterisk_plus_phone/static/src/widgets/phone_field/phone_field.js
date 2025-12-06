@@ -20,7 +20,11 @@ patch(PhoneField.prototype, {
             ["originate_type"]
         )
         if (this.mainPhone && asterisk_user && asterisk_user.originate_type === 'client') {
-            let props = {phone: this.props.record.data[this.props.name]}
+            const props = {
+                phone: this.props.record.data[this.props.name],
+                resModel: this.env.model.config.resModel,
+                resId: this.env.model.config.resId,
+            }
             this.mainPhone.props.bus.trigger('busPhoneMakeCall', props)
         } else {
             super._onClickCallButton(e)
