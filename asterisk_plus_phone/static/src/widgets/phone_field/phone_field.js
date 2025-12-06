@@ -25,7 +25,11 @@ Phone.include({
         })
 
         if (this.mainPhone && asterisk_user && asterisk_user.originate_type === 'client') {
-            let props = {phone: this.value}
+            const props = {
+                phone: this.value,
+                resModel: this.model,
+                resId: parseInt(this.res_id),
+            }
             this.mainPhone.props.bus.trigger('busPhoneMakeCall', props)
         } else {
             return this._rpc({

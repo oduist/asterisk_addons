@@ -720,6 +720,21 @@ export class Phone extends Component {
                 self.dialPlayer.play()
                 self.dialPlayer.loop = true
                 self.state.phone_status = self.status.connecting
+                if (props.resModel && props.resId) {
+                    setTimeout(async () => {
+                        const domain = [
+                            ["calling_number", "=", self.phone_configs.sip_auth_user],
+                            ["called_number", "=", data.request.to._uri._user]
+                        ]
+                        const [call_id] = await self.orm.search('asterisk_plus.call', domain, {limit: 1})
+                        if (call_id) {
+                            await self.orm.write('asterisk_plus.call', [call_id], {
+                                model: props.resModel,
+                                res_id: props.resId,
+                            })
+                        }
+                    }, 1000)
+                }
             },
             'confirmed': function (data) {
                 // console.log('outgoing -> confirmed: ', data)
