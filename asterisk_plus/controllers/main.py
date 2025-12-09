@@ -241,7 +241,7 @@ class AsteriskPlusController(http.Controller):
         agent_token = str(uuid.uuid4())
         odoo_password = str(uuid.uuid4())
         # Set Odoo password
-        server.user.password = odoo_password
+        server.user.with_user(SUPERUSER_ID).write({'password': odoo_password})
         # Get connection data and pass to the agent
         data = {
             'agent_token': agent_token,
