@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 class Lead(models.Model):
     _inherit = 'crm.lead'
 
+    if release.version_info[0] >= 19:
+        mobile = fields.Char()
     asterisk_calls_count = fields.Integer(
         compute='_get_asterisk_calls_count', string='Calls', compute_sudo=True)
     phone_normalized = fields.Char(compute='_get_phone_normalized',
