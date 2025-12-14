@@ -90,9 +90,7 @@ class PbxUser(models.Model):
             else:
                 self.clear_caches()
         for pbx_user in pbx_users:
-            if pbx_user.user and not pbx_user.user.has_group('asterisk_plus.group_asterisk_user'):
-                group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
-                group_asterisk_user.write({'users': [(4, pbx_user.user.id)]})
+            pbx_user.manage_group()
         return pbx_users
 
     def write(self, vals):
@@ -107,10 +105,10 @@ class PbxUser(models.Model):
                         ', '.join(restricted_fields)))
         group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
         if 'user' in vals.keys():
-            group_asterisk_user.with_context(install_mode=True).write({'users': [(3, self.user.id)]})
+            self.manage_group('remove')
         user = super(PbxUser, self).write(vals)
         if 'user' in vals.keys() and not self.user.has_group('asterisk_plus.group_asterisk_user'):
-            group_asterisk_user.write({'users': [(4, self.user.id)]})
+            self.manage_group()
         if user and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
                 self.env.registry.clear_cache()
@@ -119,8 +117,8 @@ class PbxUser(models.Model):
         return user
 
     def unlink(self):
-        group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
-        group_asterisk_user.with_context(install_mode=True).write({'users': [(3, self.user.id)]})
+        for rec in self:
+            rec.manage_group('remove')
         res = super(PbxUser, self).unlink()
         if res and not self.env.context.get('no_clear_cache'):
             if release.version_info[0] >= 17:
@@ -264,6 +262,21 @@ class PbxUser(models.Model):
 
     def apply_sip_peers(self):
         self.env['asterisk_plus.settings'].asterisk_plus_notify('Enterprise Feature')
+
+    def manage_group(self, action='add'):
+        attribute_name = 'user_ids' if release.version_info[0] >= 19 else 'users'
+        if self.user and self.user.has_group('base.group_system') and self.user.has_group('base.group_erp_manager'):
+            group_asterisk_admin = self.env.ref('asterisk_plus.group_asterisk_admin')
+            if action == 'add':
+                group_asterisk_admin.write({attribute_name: [(4, self.user.id)]})
+            else:
+                group_asterisk_admin.with_context(install_mode=True).write({attribute_name: [(3, self.user.id)]})
+        elif self.user:
+            group_asterisk_user = self.env.ref('asterisk_plus.group_asterisk_user')
+            if action == 'add':
+                group_asterisk_user.write({attribute_name: [(4, self.user.id)]})
+            else:
+                group_asterisk_user.with_context(install_mode=True).write({attribute_name: [(3, self.user.id)]})
 
 
 
