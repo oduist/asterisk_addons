@@ -48,7 +48,7 @@ def format_number(self, number, country=None, format_type='e164'):
 
 
 class Partner(models.Model):
-    _inherit = ['res.partner']
+    _inherit = 'res.partner'
 
     phone_normalized = fields.Char(compute='_get_phone_normalized',
                                    index=True, store=True,
