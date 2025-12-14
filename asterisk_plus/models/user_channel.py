@@ -63,10 +63,13 @@ class UserChannel(models.Model):
         selection=SIP_TRANSPORT_SELECTION,
         default=lambda x: get_default_server(x).sip_peer_transport)
 
-    _sql_constraints = [
-        ('server_channel_uniq', 'unique (server,name)',
-         'The channel is already defined for this server!'),
-    ]
+    if release.version_info[0] >= 19:
+        _server_channel_uniq = models.Constraint('UNIQUE(server,name)', 'The channel is already defined for this server!')
+    else:
+        _sql_constraints = [
+            ('server_channel_uniq', 'unique (server,name)',
+             'The channel is already defined for this server!'),
+        ]
 
     def write(self, values):
         if not (self.env.user.has_group(

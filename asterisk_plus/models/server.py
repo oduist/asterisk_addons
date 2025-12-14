@@ -196,9 +196,12 @@ class Server(models.Model):
     agent_url = fields.Char(string='Agent URL', required=True, default='https://localhost:48000')
     agent_token = fields.Char(required=True, default=lambda x: uuid.uuid4().hex)
 
-    _sql_constraints = [
-        ('user_unique', 'UNIQUE("user")', 'This user is already used for another server!'),
-    ]
+    if release.version_info[0] >= 19:
+        _user_uniq = models.Constraint('UNIQUE(user)', 'This user is already used for another server!')
+    else:
+        _sql_constraints = [
+            ('user_unique', 'UNIQUE("user")', 'This user is already used for another server!'),
+        ]
 
     def write(self, vals):
         agent_url = vals.get('agent_url')

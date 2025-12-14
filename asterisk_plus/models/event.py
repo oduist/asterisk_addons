@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 
-from odoo import models, fields, api
+from odoo import models, fields, api, release
 
 
 class Event(models.Model):
@@ -25,11 +25,14 @@ class Event(models.Model):
 
     icon = fields.Html(compute='_get_icon', string='I')
 
-    _sql_constraints = [
-        ('event_uniq',
-         'check(1=1)',
-         'Should be remove in next pre-upgrade script.')
-    ]
+    if release.version_info[0] >= 19:
+        _event_uniq = models.Constraint('CHECK(1 = 1)', 'Should be remove in next pre-upgrade script.')
+    else:
+        _sql_constraints = [
+            ('event_uniq',
+             'check(1=1)',
+             'Should be remove in next pre-upgrade script.')
+        ]
 
     def _get_icon(self):
         for rec in self:

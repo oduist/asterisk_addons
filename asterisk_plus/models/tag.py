@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, release
 
 
 class Tag(models.Model):
@@ -14,9 +14,12 @@ class Tag(models.Model):
                                   column1='recording', column2='tag')
     recording_count = fields.Integer(compute='_get_recording_count')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', 'The name must be unique!'),
-    ]
+    if release.version_info[0] >= 19:
+        _name_uniq = models.Constraint('UNIQUE(name)', 'The name must be unique!')
+    else:
+        _sql_constraints = [
+            ('name_uniq', 'unique (name)', 'The name must be unique!'),
+        ]
 
     @api.model_create_multi
     def create(self, vals_list):

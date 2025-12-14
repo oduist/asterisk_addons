@@ -70,12 +70,16 @@ class PbxUser(models.Model):
     dial_timeout = fields.Integer(default=30, required=True)
     record_calls = fields.Boolean()
 
-    _sql_constraints = [
-        ('exten_uniq', 'unique (exten,server)',
-         'This phone extension is already used!'),
-        ('user_uniq', 'unique ("user",server)',
-         'This user is already defined!'),
-    ]
+    if release.version_info[0] >= 19:
+        _exten_uniq = models.Constraint('UNIQUE(exten,server)', 'This phone extension is already used!')
+        _user_uniq = models.Constraint('UNIQUE("user",server)', 'This user is already defined!')
+    else:
+        _sql_constraints = [
+            ('exten_uniq', 'unique (exten,server)',
+             'This phone extension is already used!'),
+            ('user_uniq', 'unique ("user",server)',
+             'This user is already defined!'),
+        ]
 
     @api.model_create_multi
     def create(self, vals_list):
