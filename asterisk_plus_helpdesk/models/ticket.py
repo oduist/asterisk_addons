@@ -33,5 +33,5 @@ class Ticket(models.Model):
                 logger.exception(e)
         res = super(Ticket, self).create(vals_list)
         if res:
-            self.pool.clear_caches()
+            self.pool.clear_all_caches()
         return res
