@@ -5,7 +5,7 @@
     'description': """Make and receive calls from Odoo.""",
     'currency': 'EUR',
     'price': '0',
-    'version': '1.9.2',
+    'version': '1.9.3',
     'category': 'Phone',
     'author': 'Oduist',
     'license': 'Other proprietary',
@@ -32,6 +32,7 @@
     'demo': [],
     'assets': {
         'web.assets_backend': [
+            '/asterisk_plus_phone/static/src/widgets/phone_field/*',
             '/asterisk_plus_phone/static/src/icomoon/style.css',
             '/asterisk_plus_phone/static/src/js/utils.js',
             '/asterisk_plus_phone/static/src/components/tray/*',
