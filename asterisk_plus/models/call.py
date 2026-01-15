@@ -452,7 +452,7 @@ class Call(models.Model):
                 if user.asterisk_users[0].missed_calls_notify:
                     notify_users.append(user)
         # Register call at partner or reference object
-        if self.partner and self.model != 'res.partner':
+        if self.partner or self.model == 'res.partner':
             sub_register_call(self.partner, body=' '.join(message), subtype_xmlid='mail.mt_note')
             message.insert(1, 'partner {}'.format(self.partner.name))
         if self.ref:
