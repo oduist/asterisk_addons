@@ -712,7 +712,7 @@ export class Phone extends Component {
                 if (props.resModel && props.resId) {
                     setTimeout(async () => {
                         const domain = [
-                            ["calling_number", "=", self.phone_configs.sip_auth_user],
+                            ["calling_number", "=", self.phone_configs.sip_auth_user || self.phone_configs.sip_user],
                             ["called_number", "=", data.request.to._uri._user]
                         ]
                         const [call_id] = await self.orm.search('asterisk_plus.call', domain, {limit: 1})
@@ -720,7 +720,7 @@ export class Phone extends Component {
                             model: props.resModel,
                             res_id: props.resId,
                         })
-                    }, 1000)
+                    }, 2000)
                 }
             },
             'confirmed': function (data) {
@@ -890,7 +890,7 @@ export class Phone extends Component {
             if (self.state.callerId.phoneNumber === phoneNumber) {
                 self.state.callDurationTime = new Date((self.callDuration) * 1000).toISOString().substring(11, 19)
             }
-        }, 1000)
+        }, 2000)
     }
 
     destroyCallCounter() {
