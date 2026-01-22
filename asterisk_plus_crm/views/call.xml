@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_lead_call_form" model="ir.ui.view">
+        <field name="name">view_lead_call_form</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_form"/>
+        <field name="arch" type="xml">
+            <button name="partner_button" position="after">
+                <button string="Lead" name="lead_button" type="object"                    
+                    class="oe_highlight" icon='fa-money'/>
+            </button>
+            <field name="ref" position="after">
+                <field name="source"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_lead_call_search" model="ir.ui.view">
+        <field name="name">view_lead_call_search</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_search"/>
+        <field name="arch" type="xml">
+            <filter name="out" position="after">
+                <separator/>
+                <filter name="crm" string="CRM" domain="[('model', '=', 'crm.lead')]"/>
+            </filter>
+            <field name="partner" position="after">
+                <field name="source"/>
+            </field>
+            <filter name="by_partner" position="after">
+                <filter name="by_source" string="Source" context="{'group_by': 'source'}"/>
+            </filter>
+        </field>
+    </record>
+
+</odoo>
