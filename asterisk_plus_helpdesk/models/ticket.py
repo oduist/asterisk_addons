@@ -1,6 +1,6 @@
 
 import logging
-from odoo import api, models, fields
+from odoo import api, models, fields, release
 
 logger = logging.getLogger(__name__)
 
@@ -33,5 +33,9 @@ class Ticket(models.Model):
                 logger.exception(e)
         res = super(Ticket, self).create(vals_list)
         if res:
-            self.pool.clear_caches()
+            if res:
+                if release.version_info[0] >= 17:
+                    self.env.registry.clear_cache()
+                else:
+                    self.clear_caches()
         return res
