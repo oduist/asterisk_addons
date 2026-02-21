@@ -510,10 +510,17 @@ class Call(models.Model):
                 _('PBX user is not configured!'))
         if not asterisk_user.channels:
             raise ValidationError(_('User has not channels to originate!'))
-        # Get parrent channel for a call
-        channel = self.channels.filtered(lambda x: not x.parent_channel)
+        # Get the extension/agent channel for spy.
+        # For inbound calls the agent channel is the child (has parent_channel).
+        # For outbound calls the agent channel is the parent (no parent_channel).
+        if self.direction == 'in':
+            channel = self.channels.filtered(
+                lambda x: x.parent_channel and x.is_active)
+        else:
+            channel = self.channels.filtered(lambda x: not x.parent_channel)
+        channel = channel[:1]
         if not channel:
-            raise ValidationError(_('Parrent channel for a call not found!'))
+            raise ValidationError(_('Channel for spy not found!'))
         if option == 'q':
             callerid = 'Spy'
         elif option == 'qw':
