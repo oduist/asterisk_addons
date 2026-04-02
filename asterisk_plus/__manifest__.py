@@ -5,7 +5,7 @@
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'author': 'Oduist',
     'price': 0,
-    'version': '4.2.1',
+    'version': '5.0.1',
     'currency': 'EUR',
     'maintainer': 'Oduist',
     'support': 'support@oduist.com',
@@ -15,10 +15,11 @@
     'description': 'Asterisk plus Odoo',
     'depends': ['base', 'mail', 'phone_validation'],
     'external_dependencies': {
-        'python': [],
+        'python': ['PyJWT'],
     },
     'data': [
         # Security rules
+        'security/license.xml',
         'security/groups.xml',
         'security/server.xml',
         'security/server_record_rules.xml',
@@ -31,10 +32,12 @@
         'data/events.xml',
         'data/res_users.xml',
         'data/server.xml',
+        'data/license.xml',
         'data/data.xml',
         'data/agent_options.xml',
         # UI Views
         'views/menu.xml',
+        'views/license.xml',
         'views/event.xml',
         'views/server.xml',
         'views/settings.xml',
@@ -62,16 +65,19 @@
     'installable': True,
     'application': True,
     'auto_install': False,
+    'post_init_hook': 'post_init_hook',
     'images': ['static/description/logo.png'],
     'assets': {
         'web.assets_backend': [
             '/asterisk_plus/static/src/widgets/phone_field/*',
             '/asterisk_plus/static/src/services/actions/*',
             '/asterisk_plus/static/src/services/active_calls/*',
+            '/asterisk_plus/static/src/components/license_banner/*',
         ],
         'web.assets_qweb': [
             '/asterisk_plus/static/src/services/active_calls/active_calls_popup.xml',
             '/asterisk_plus/static/src/services/active_calls/active_calls_tray.xml',
+            '/asterisk_plus/static/src/components/license_banner/license_banner.xml',
         ],
     }
 }

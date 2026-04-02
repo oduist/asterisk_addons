@@ -1,0 +1,14 @@
+<odoo>
+
+  <!-- Oduist License -->
+  <record id="oduist_license_admin" model="ir.model.access">
+    <field name="name">oduist_license_admin</field>
+    <field name="model_id" ref="asterisk_plus.model_oduist_license"/>
+    <field name="group_id" ref="base.group_system"/>
+    <field name="perm_read" eval="1"/>
+    <field name="perm_write" eval="1"/>
+    <field name="perm_create" eval="1"/>
+    <field name="perm_unlink" eval="1"/>
+  </record>
+
+</odoo>

@@ -3,7 +3,7 @@ from odoo import api, models
 
 
 class Partner(models.Model):
-    _inherit = ['res.partner']
+    _inherit = 'res.partner'
 
     @api.model_create_multi
     def create(self, vals_list):
