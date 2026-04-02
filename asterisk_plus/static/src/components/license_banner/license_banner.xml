@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="oduist.LicenseBanner">
+        <div t-if="state.visible" t-att-class="bannerClass" t-on-click="openSettings">
+            <i t-if="state.type === 'info'" class="fa fa-info-circle me-2"/>
+            <i t-if="state.type === 'warning'" class="fa fa-exclamation-triangle me-2"/>
+            <i t-if="state.type === 'danger'" class="fa fa-exclamation-circle me-2"/>
+            <span t-esc="state.message"/>
+        </div>
+    </t>
+
+</templates>

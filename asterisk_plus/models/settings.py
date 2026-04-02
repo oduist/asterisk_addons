@@ -11,6 +11,9 @@ import uuid
 from odoo import fields, models, api, tools, release, release
 from odoo.exceptions import ValidationError, UserError
 from odoo.tools import ormcache
+from odoo.addons.asterisk_plus.models.license import ODUIST_MODULES
+
+ODUIST_MODULES.append('asterisk_plus')
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,6 @@ RECORDING_ACCESS_SELECTION = [
     ('local', 'Local Download'),
 ]
 
-PREPAID_PAYMENT_URL = 'https://buy.stripe.com/aEU01VaER5D15lC4gj'
 # Starting from Odoo 12.0 there is admin user with ID 2.
 ADMIN_USER_ID = 1 if release.version_info[0] <= 11 else 2
 
@@ -164,44 +166,14 @@ class Settings(models.Model):
     completion_model = fields.Char(required=True, default='gpt-4o')
     register_summary = fields.Boolean(help='Register summary at partner of reference chat.', default=True)
     remove_recording_after_transcript = fields.Boolean()
-    #############  REGISTRATION FIELDS   ###############################################
+    #############  INSTANCE DATA FIELDS   ###############################################
     instance_uid = fields.Char('Instance UID', compute='_get_instance_data')
     api_url = fields.Char('API URL', compute='_get_instance_data')
     api_fallback_url = fields.Char('API Fallback URL', compute='_get_instance_data')
-    # Registration fields
-    customer_code = fields.Char()
-    registration_number = fields.Char(compute='_get_instance_data')
-    registration_key = fields.Char('API Key', compute='_get_instance_data')
-    is_registered = fields.Boolean()
-    i_agree_to_register = fields.Boolean()
-    i_agree_to_contact = fields.Boolean()
-    i_agree_to_receive = fields.Boolean()
     installation_date = fields.Datetime(compute='_get_instance_data')
     module_version = fields.Char(compute='_get_instance_data')
     odoo_version = fields.Char(compute='_get_instance_data')
-    admin_name = fields.Char()
-    admin_phone = fields.Char(
-        help='It is required to contact this instance’s administrator in case any critical vulnerabilities are found in the application.')
-    admin_email = fields.Char(
-        help='It is required to contact this instance administrator by email in case any non-critical vulnerabilities are found in the application.')
-    company_name = fields.Char(help='Company name of this instance.')
-    company_country = fields.Many2one('res.country',
-                                      help='We use the company’s country information for statistical tracking of our product installations by country.')
-
     web_base_url = fields.Char(compute='_get_instance_data', string='Odoo URL')
-
-    def set_default_admin_and_company(self):
-        self.company_name = self.env.user.company_id.name
-        self.company_country = self.env.user.company_id.country_id
-        self.admin_name = self.env.user.partner_id.name
-        self.admin_email = self.env.user.partner_id.email
-        self.admin_phone = self.env.user.partner_id.phone
-
-    def read(self, fields_to_read, load='_classic_read'):
-        if not self.admin_name:
-            self.set_default_admin_and_company()
-        res = super(Settings, self).read(fields_to_read, load=load)
-        return res
 
     def _get_instance_data(self):
         module = self.env['ir.module.module'].sudo().search([('name', '=', 'asterisk_plus')])
@@ -217,30 +189,7 @@ class Settings(models.Model):
             rec.installation_date = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.installation_date')
             rec.api_url = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.api_url')
             rec.api_fallback_url = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.api_fallback_url')
-            rec.registration_key = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.registration_key')
             rec.web_base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-            rec.registration_number = self.env['ir.config_parameter'].sudo().get_param('asterisk_plus.registration_number')
-
-    def make_api_request(self, path, method, data={}, headers={}, raise_on_error=False):
-        url = self.env['ir.config_parameter'].get_param(
-            'asterisk_plus.registration_url', 'https://api1.oduist.com/instance/')
-        if not url.endswith('/'):
-            url = '{}/'.format(url)
-        res = None
-        try:
-            res = method(urljoin(url, path), json=data, headers=headers)
-            if res.status_code == 200:
-                res = res.json()
-                if res.get('error'):
-                    raise ValidationError(res['error'])
-                return res
-            else:
-                raise ValidationError(res.text)
-        except Exception as e:
-            if raise_on_error:
-                raise ValidationError(str(e))
-            else:
-                return {}
 
     @api.model
     def set_instance_uid(self, instance_uid=False):
@@ -249,98 +198,6 @@ class Settings(models.Model):
             if not instance_uid:
                 instance_uid = str(uuid.uuid4())
             self.env['ir.config_parameter'].set_param('asterisk_plus.instance_uid', instance_uid)
-
-    def register_instance(self):
-        if not self.env.user.has_group('base.group_system'):
-            raise ValidationError('Only Odoo admin can do it!')
-        if self.get_param('is_registered'):
-            raise ValidationError('This instance is already registered!')
-        data = self.prepare_registration_data()
-        if not data.get('customer_code'):
-            raise ValidationError('Enter your customer code!')
-        required_fields = [
-            'admin_email', 'admin_name', 'admin_phone', 'company_country', 'installation_date', 'module_name',
-            'module_version', 'url', 'odoo_version']
-        missing_fields = [field for field in required_fields if not data.get(field)]
-        if missing_fields:
-            raise ValidationError(
-                f"Please fill in the following fields: {', '.join([k.replace('_', ' ').capitalize() for k in missing_fields])}"
-            )
-        res = self.make_api_request('registration', requests.post, data=data, raise_on_error=True)
-        if not res and self.get_param('api_fallback_url'):
-            # Make a request and give error if fallback API endpoint is not available.
-            logger.warning('Making a request to API fallback.')
-            res = self.make_api_request(self.get_param('api_fallback_url'), requests.post, data=data, raise_on_error=True)
-        self.env['ir.config_parameter'].sudo().set_param(
-            'asterisk_plus.registration_key', res.get('registration_key'))
-        self.env['ir.config_parameter'].sudo().set_param(
-            'asterisk_plus.registration_number', res.get('registration_number'))
-        self.set_param('is_registered', True)
-        self.asterisk_plus_notify("Instance registered successfully!", title="Registration")
-
-    def update_instance_registration(self):
-        if not self.env.user.has_group("base.group_system"):
-            raise ValidationError("Only Odoo admin can do it!")
-        if not self.get_param("is_registered"):
-            raise ValidationError("This instance is not registered yet! Please register first.")
-        data = self.prepare_registration_data()
-        required_fields = [
-            "admin_email",
-            "admin_name",
-            "admin_phone",
-            "company_name",
-            "company_country",
-            "installation_date",
-            "module_name",
-            "module_version",
-            "url",
-            "odoo_version",
-        ]
-        missing_fields = [field for field in required_fields if not data.get(field)]
-        if missing_fields:
-            raise ValidationError(
-                f"Please fill in the following fields: {', '.join([k.replace('_', ' ').capitalize() for k in missing_fields])}"
-            )
-        res = self.make_usage_request(
-            "update_registration", requests.post, data=data, raise_on_error=True
-        )
-        # Display the message returned from the API
-        message = res.get("message", "Registration updated successfully!")
-        self.asterisk_plus_notify(message, title="Registration Update")
-
-    def action_open_system_parameters(self):
-        if release.version_info[0] >= 18:
-            view_mode = "list,form"
-        else:
-            view_mode = "tree,form"
-        return {
-            "type": "ir.actions.act_window",
-            "name": "System Parameters",
-            "res_model": "ir.config_parameter",
-            "view_mode": view_mode,
-            "target": "current",
-            "context": {"search_default_key": "asterisk_plus.api_url"},
-        }
-
-    def prepare_registration_data(self):
-        company_country = self.get_param("company_country")
-        return {
-            'instance_uid': self.get_param('instance_uid'),
-            'company_name': self.get_param('company_name'),
-            "company_country": company_country.name if company_country else False,
-            "company_country_code": company_country.code if company_country else False,
-            "company_country_name": company_country.name if company_country else False,
-            'admin_name': self.get_param('admin_name'),
-            'admin_email': self.get_param('admin_email'),
-            'admin_phone': self.get_param('admin_phone'),
-            'module_version': self.get_param('module_version'),
-            'module_name': MODULE_NAME,
-            'odoo_version': self.get_param('odoo_version'),
-            'odoo_full_version': release.version,
-            'url': self.get_param('web_base_url'),
-            'installation_date': self.get_param('installation_date').strftime("%Y-%m-%d"),
-            'customer_code': self.get_param('customer_code'),
-        }
 
     @api.model
     def get_instance_support_data(self):

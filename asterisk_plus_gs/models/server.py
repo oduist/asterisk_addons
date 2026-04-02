@@ -8,6 +8,9 @@ from requests.compat import urljoin
 from urllib.parse import urlencode
 from odoo import fields, models, api
 from odoo.exceptions import ValidationError
+from odoo.addons.asterisk_plus.models.license import ODUIST_MODULES
+
+ODUIST_MODULES.append('asterisk_plus_gs')
 from odoo.addons.asterisk_plus.models.settings import debug
 
 GS_HEADERS = {

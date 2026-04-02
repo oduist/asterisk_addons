@@ -12,4 +12,6 @@ from . import user
 from . import res_partner
 from . import tag
 from . import debug
+from . import license
+from . import ir_module_module
 # from . import compat # Used only to upgrade old installations.
