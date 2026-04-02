@@ -6,8 +6,7 @@
         <field name="inherit_id" ref="asterisk_plus.asterisk_settings_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='transcription']" position="after">
-                <page name="webrtc" string="WebRTC"
-                      invisible="is_registered == False">
+                <page name="webrtc" string="WebRTC">
                     <group>
                         <field name="phone_enabled"/>
                     </group>

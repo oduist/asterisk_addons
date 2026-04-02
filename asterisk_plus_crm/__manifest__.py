@@ -28,4 +28,5 @@
     'application': False,
     'auto_install': False,
     'images': ['static/description/logo.png'],
+    "post_init_hook": "post_init_hook",
 }
