@@ -1,5 +1,8 @@
 import logging
 from odoo import api, models, fields, tools, release
+from odoo.addons.asterisk_plus.models.license import ODUIST_MODULES
+
+ODUIST_MODULES.append('asterisk_plus_project')
 
 logger = logging.getLogger(__name__)
 

@@ -5,6 +5,9 @@ import re
 from odoo import fields, models, api, release
 from odoo.exceptions import ValidationError
 from odoo.addons.asterisk_plus.models.settings import debug
+from odoo.addons.asterisk_plus.models.license import ODUIST_MODULES
+
+ODUIST_MODULES.append('asterisk_plus_callgroup')
 
 logger = logging.getLogger(__name__)
 

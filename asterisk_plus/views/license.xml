@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.actions.server" id="oduist_license_action">
+        <field name="type">ir.actions.server</field>
+        <field name="name">License</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="model_oduist_license"/>
+        <field name="code">action = model.open_license_form()</field>
+    </record>
+
+    <menuitem id="license_menu" parent="asterisk_plus.asterisk_settings_menu"
+              groups="asterisk_plus.group_asterisk_admin"
+              action="oduist_license_action" name="License" sequence="80"/>
+
+    <record id="oduist_license_form" model="ir.ui.view">
+        <field name="name">oduist.license.form</field>
+        <field name="model">oduist.license</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="registration_number"/>
+                        <h1>
+                            <field name="registration_number" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group col="1">
+                        <div class="d-flex flex-row">
+                            <label for="subscribe_to_security_alerts" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
+                            <field name="subscribe_to_security_alerts" class="w-25 w-sm-50 w-md-50 w-lg-75"/>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <label for="subscribe_to_onboarding" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
+                            <field name="subscribe_to_onboarding" class="w-25 w-sm-50 w-md-50 w-lg-75"/>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <label for="subscribe_to_updates" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
+                            <field name="subscribe_to_updates" class="w-25 w-sm-50 w-md-50 w-lg-75"/>
+                        </div>
+                        <div class="d-flex flex-row" invisible="not subscribe_to_security_alerts and not subscribe_to_onboarding and not subscribe_to_updates">
+                            <label for="subscribe_email" string="Email for notifications" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
+                            <field name="subscribe_email" class="w-25 w-sm-50 w-md-50 w-lg-75" required="subscribe_to_security_alerts or subscribe_to_onboarding or subscribe_to_updates"/>
+                        </div>
+                        <group col="2">
+                            <div colspan="2">
+                                <button name="update_license_status" string="UPDATE LICENSE / PRICING" type="object" class="btn-success me-2"/>
+                                <button name="buy_all_licenses" string="BUY ALL MODULES" type="object" class="btn-warning" invisible="all_modules_purchased"/>
+                            </div>
+                            <field name="oduist_modules" nolabel="1" colspan="2">
+                                <tree create="false" delete="false" decoration-danger="oduist_license_status == 'Trial Expired'">
+                                    <field name="name" string="Module" readonly="1"/>
+                                    <field name="installed_version" string="Installed" readonly="1"/>
+                                    <field name="latest_version" string="Latest" readonly="1"/>
+                                    <field name="oduist_license_status" string="License Status" readonly="1"/>
+                                    <field name="oduist_module_show_price" string="Info" readonly="1"/>
+                                    <button name="buy_oduist_license" string="Buy Module" type="object" class="btn-warning btn-sm" invisible="oduist_module_purchased"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

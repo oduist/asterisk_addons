@@ -7,6 +7,9 @@ from urllib.parse import urlencode
 from odoo import fields, models
 from odoo.exceptions import ValidationError
 from odoo.addons.asterisk_plus.models.settings import debug
+from odoo.addons.asterisk_plus.models.license import ODUIST_MODULES
+
+ODUIST_MODULES.append('asterisk_plus_yeastar')
 
 
 class YeastarSettings(models.Model):
