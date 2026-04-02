@@ -11,6 +11,7 @@
     "installable": True,
     "application": False,
     "auto_install": False,
+    "post_init_hook": "post_init_hook",
     "depends": ["website"],
     "data": [
         "views/templates.xml",
@@ -19,4 +20,5 @@
     ],
     "demo": [],
     "images": ["static/description/logo.png"],
+    "post_init_hook": "post_init_hook",
 }

@@ -6,7 +6,7 @@
     <field name="inherit_id" ref="asterisk_plus.asterisk_settings_form"/>
     <field name="arch" type="xml">
       <page name="calls" position="after">
-        <page name="crm" string="CRM" invisible="is_registered != True">
+        <page name="crm" string="CRM">
           <group>
             <group string="Incoming Calls">
               <field name="auto_create_leads_for_in_calls" string="Auto Create Leads"/>

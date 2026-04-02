@@ -225,8 +225,6 @@ class Server(models.Model):
                 release.major_version)
 
     def open_server_form(self):
-        if not self.env['asterisk_plus.settings'].get_param('is_registered'):
-            return self.env['asterisk_plus.settings'].open_settings_form()
         rec = self.env.ref('asterisk_plus.default_server')
         return {
             'type': 'ir.actions.act_window',
