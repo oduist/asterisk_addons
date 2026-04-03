@@ -46,6 +46,7 @@
                         <group col="2">
                             <div colspan="2">
                                 <button name="update_license_status" string="UPDATE LICENSE / PRICING" type="object" class="btn-success me-2"/>
+                                <field name="all_modules_purchased" invisible="1"/>
                                 <button name="buy_all_licenses" string="BUY ALL MODULES" type="object" class="btn-warning" attrs="{'invisible': [('all_modules_purchased', '=', True)]}"/>
                             </div>
                             <field name="oduist_modules" nolabel="1" colspan="2">
@@ -55,6 +56,7 @@
                                     <field name="latest_version" string="Latest" readonly="1"/>
                                     <field name="oduist_license_status" string="License Status" readonly="1"/>
                                     <field name="oduist_module_show_price" string="Info" readonly="1"/>
+                                    <field name="oduist_module_purchased" invisible="1"/>
                                     <button name="buy_oduist_license" string="Buy Module" type="object" class="btn-warning btn-sm" attrs="{'invisible': [('oduist_module_purchased', '=', True)]}"/>
                                 </tree>
                             </field>
