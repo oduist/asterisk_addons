@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
+const { Component, onWillStart, useState } = owl;
+
 export class LicenseBanner extends Component {
     static template = "oduist.LicenseBanner";
-    static props = {};
 
     setup() {
         this.orm = useService("orm");
