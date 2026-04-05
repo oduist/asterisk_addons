@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-const { Component, onWillStart, useState } = owl;
+const { Component, useState } = owl;
 
 export class LicenseBanner extends Component {
     static template = "oduist.LicenseBanner";
@@ -16,10 +16,10 @@ export class LicenseBanner extends Component {
             message: "",
             type: "info", // info, warning, danger
         });
+    }
 
-        onWillStart(async () => {
-            await this.loadLicenseStatus();
-        });
+    async willStart() {
+        await this.loadLicenseStatus();
     }
 
     async loadLicenseStatus() {

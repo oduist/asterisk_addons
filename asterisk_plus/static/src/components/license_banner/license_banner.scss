@@ -1,4 +1,4 @@
-.oduist-license-banner {
+.o_main_navbar .oduist-license-banner {
     display: inline-flex;
     align-items: center;
     padding: 4px 12px;
@@ -21,25 +21,25 @@
     }
 
     // Info state (trial with more than 7 days)
-    &-info {
-        background-color: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
+    &.oduist-license-banner-info {
+        background-color: #d1ecf1 !important;
+        color: #0c5460 !important;
+        border: 1px solid #bee5eb !important;
     }
 
     // Warning state (trial with 7 or fewer days)
-    &-warning {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeaa7;
+    &.oduist-license-banner-warning {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        border: 1px solid #ffeaa7 !important;
         animation: pulse-warning 2s ease-in-out infinite;
     }
 
     // Danger state (trial expired)
-    &-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+    &.oduist-license-banner-danger {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border: 1px solid #f5c6cb !important;
         animation: pulse-danger 1.5s ease-in-out infinite;
     }
 }
