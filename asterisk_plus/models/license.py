@@ -15,6 +15,8 @@ from urllib.parse import urljoin
 
 import jwt
 import requests
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from odoo import api, fields, models, release
 from odoo.exceptions import ValidationError
 
@@ -209,9 +211,12 @@ class OduistLicense(models.Model):
             return None
 
         try:
+            key = load_pem_public_key(
+                public_key.encode("utf-8"), backend=default_backend()
+            )
             payload = jwt.decode(
                 token,
-                public_key,
+                key,
                 algorithms=["RS256"],
                 options={"verify_signature": True},
             )
