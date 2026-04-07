@@ -22,6 +22,9 @@ MAX_EXTEN_LEN = 6
 FORMAT_TYPE = 'e164'
 RECORDING_ACCESS_SELECTION = [
     ('local', 'Local Download'),
+    ('remote', 'Remote Download'),
+    ('asterisk_http', 'Asterisk HTTP link'),
+    ('s3', 'S3 Storage link'),
 ]
 
 # Starting from Odoo 12.0 there is admin user with ID 2.
@@ -375,4 +378,32 @@ class Settings(models.Model):
     def _check_trailing_recordings_access_url_slash(self):
         if isinstance(self.recordings_access_url, str) and not self.recordings_access_url.endswith('/'):
             raise ValidationError('Recording Access URL must end with a slash!')
+
+    def sync_recording_storage(self):
+        """Move call recordings between database and filestore storage."""
+        count = 0
+        try:
+            recordings = self.env['asterisk_plus.recording'].search([])
+            for rec in recordings:
+                if self.recording_storage == 'filestore' and not rec.recording_attachment:
+                    rec.write({
+                        'recording_data': False,
+                        'recording_attachment': rec.recording_data})
+                    count += 1
+                    self.env.cr.commit()
+                elif self.recording_storage == 'db' and not rec.recording_data:
+                    rec.write({
+                        'recording_attachment': False,
+                        'recording_data': rec.recording_attachment})
+                    count += 1
+                    self.env.cr.commit()
+                logger.info('Recording {} moved to {}'.format(rec.id, self.recording_storage))
+        except Exception as e:
+            logger.info('Sync recordings error: %s', str(e))
+        finally:
+            logger.info('Moved %s recordings', count)
+            if release.version_info[0] >= 14:
+                self.env['ir.attachment']._gc_file_store()
+            else:
+                self.env['ir.attachment']._file_gc()
 

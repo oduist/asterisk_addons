@@ -204,7 +204,16 @@ class Server(models.Model):
         if agent_url:
             vals.update({'agent_url': agent_url.replace('http://', 'https://')})
         res = super().write(vals)
+        if vals.get('auto_create_pbx_users'):
+            self.run_auto_create_pbx_users()
         return res
+
+    @api.model
+    def run_auto_create_pbx_users(self):
+        debug(self, 'Run auto create PBX users')
+        users = self.env['res.users'].search([]).filtered(
+            lambda x: x.has_group('asterisk_plus.group_asterisk_user'))
+        self.env['asterisk_plus.user'].auto_create(users)
 
     @api.constrains('agent_initialized')
     def _check_permit_initialization(self):
@@ -213,7 +222,26 @@ class Server(models.Model):
                 raise ValidationError('Permit Agent initialization first!')
 
     def get_sip_peers(self):
-        logger.info('Generate sip peers! [REQUIRED ENTERPRISE]')
+        if not self.generate_sip_peers:
+            logger.info('SIP peers generation is not enabled.')
+            return False
+        sip_content = '{}\n'.format(self.sip_templates)
+        for channel in self.env['asterisk_plus.user_channel'].sudo().search(
+                [('server', '=', self.id)]):
+            if not channel.sip_password:
+                logger.info('SIP channel %s has no password, not including.', channel.name)
+                continue
+            user_name = unicodedata.normalize(
+                'NFKD', channel.user.name).encode('ASCII', 'ignore').decode('ASCII')
+            sip_content += self.sip_peer_template.format(
+                template=channel.sip_transport,
+                password=channel.sip_password,
+                username=channel.sip_user,
+                exten=channel.asterisk_user.exten,
+                callerid='{} <{}>'.format(user_name, channel.asterisk_user.callerid_number)
+            )
+            sip_content += '\n\n'
+        return sip_content
 
     def _get_market_download_link(self):
         for rec in self:

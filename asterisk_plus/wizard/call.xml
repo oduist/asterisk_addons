@@ -38,6 +38,7 @@
                     </group>
                 </sheet>
                 <footer>
+                    <button name="submit" string="Submit" type="object" class="oe_highlight" colspan="1"/>
                     <button name="cancel" special="cancel" string="Cancel" class="oe_link"/>
                 </footer>
             </form>
@@ -45,7 +46,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="call_wizard_action">
-        <field name="name">Calls Report (Enterprise Feature)</field>
+        <field name="name">Calls Report</field>
         <field name="view_mode">form</field>
         <field name="res_model">asterisk_plus.call_wizard</field>
         <field name="target">new</field>

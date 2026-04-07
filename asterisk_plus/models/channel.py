@@ -192,6 +192,17 @@ class Channel(models.Model):
         if partner_id:
             debug(self, 'Setting partner %s for call %s' % (partner_id, channel.call.id))
             channel.call.partner = partner_id
+        elif channel.call.direction == 'in' and channel.env[
+                'asterisk_plus.settings'].get_param('auto_create_partners'):
+            # Auto-create partner for inbound calls from unknown numbers.
+            partner_number = channel.exten if channel.call.direction == 'out' else channel.callerid_num
+            partner_id = channel.env['res.partner'].with_context(
+                tracking_disable=True).sudo().create({
+                    'name': partner_number,
+                    'phone': partner_number,
+            }).id
+            debug(channel, 'Call {} auto create partner id {}'.format(channel.call.id, partner_id))
+            channel.call.partner = partner_id
         else:
             debug(self, 'Partner not found for call %s' % channel.call.id)
 

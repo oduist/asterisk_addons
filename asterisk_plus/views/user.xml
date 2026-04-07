@@ -45,7 +45,11 @@
     <field name="type">form</field>
     <field name="arch" type="xml">
       <form>
-        <header/>
+        <header>
+          <button name="apply_sip_peers" string="Apply SIP Channels"
+                  type="object" class="btn-primary"
+                  invisible="generate_sip_peers == False"/>
+        </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
             <field name="active" invisible="1"/>
@@ -71,8 +75,8 @@
               <field name="user" placeholder="Odoo user..." required="1"/>
             </group>
             <group>
-              <field name="did_number" class="d-flex flex-row w-50" widget="phone" placeholder="User DID number..." readonly="1" help="Enterprise Feature"/>
-              <field name="callerid_number" class="d-flex flex-row w-50" widget="phone" placeholder="User CallerID number..." readonly="1" help="Enterprise Feature"/>
+              <field name="did_number" class="d-flex flex-row w-50" widget="phone" placeholder="User DID number..."/>
+              <field name="callerid_number" class="d-flex flex-row w-50" widget="phone" placeholder="User CallerID number..."/>
             </group>
           </group>
           <notebook>
@@ -89,9 +93,9 @@
                       <field name="sequence" widget="handle"/>
                       <field name="name" placeholder="PJSIP/101"/>
                       <field name="sip_password" groups="asterisk_plus.group_asterisk_admin"
-                             column_invisible="True"/>
+                             column_invisible="parent.generate_sip_peers == False"/>
                       <field name="sip_transport"
-                             column_invisible="True"/>
+                             column_invisible="parent.generate_sip_peers == False"/>
                       <field name="originate_context" groups="asterisk_plus.group_asterisk_admin"/>
                       <field name="originate_enabled" widget="boolean_toggle"/>
                       <field name="auto_answer_header"/>
@@ -134,8 +138,8 @@
             <page name="fagi" string="FAGI">
               <group>
                 <group>
-                  <field name="record_calls" readonly="1" help="Enterprise Feature"/>
-                  <field name="dial_timeout" readonly="1" help="Enterprise Feature"/>
+                  <field name="record_calls"/>
+                  <field name="dial_timeout"/>
                 </group>
               </group>
             </page>

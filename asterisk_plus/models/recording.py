@@ -168,14 +168,22 @@ class Recording(models.Model):
             self.save_call_recording(call, rec)
 
     def get_all_recording_data(self, call):
-        return {
-            'recordings_access': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access'),
-            'recordings_access_url': self.env['asterisk_plus.settings'].sudo().get_param('recordings_access_url'),
-            'recordings_s3_region': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_region'),
-            'recordings_s3_bucket': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_bucket'),
-            'recordings_s3_key': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_key'),
-            'recordings_s3_secret': self.env['asterisk_plus.settings'].sudo().get_param('recordings_s3_secret'),
+        settings = self.env['asterisk_plus.settings'].sudo()
+        kwargs = {
+            'recordings_access': settings.get_param('recordings_access'),
+            'recordings_access_url': settings.get_param('recordings_access_url'),
+            'recordings_s3_region': settings.get_param('recordings_s3_region'),
+            'recordings_s3_bucket': settings.get_param('recordings_s3_bucket'),
+            'recordings_s3_key': settings.get_param('recordings_s3_key'),
+            'recordings_s3_secret': settings.get_param('recordings_s3_secret'),
         }
+        if settings.get_param('use_mp3_encoder'):
+            kwargs['file_format'] = 'mp3'
+            kwargs['mp3_bitrate'] = int(settings.get_param(
+                'mp3_encoder_bitrate', default='96'))
+            kwargs['mp3_quality'] = int(settings.get_param(
+                'mp3_encoder_quality', default=4))
+        return kwargs
 
     @api.model
     def save_call_recording(self, call, recording_channel_data):
@@ -341,6 +349,11 @@ class Recording(models.Model):
 
     def get_transcript(self, fail_silently=False):
         self.ensure_one()
+        # Check transcription rules before processing.
+        if fail_silently and not self.env[
+                'asterisk_plus.transcription_rule'].sudo().check_rules(
+                self.calling_number, self.called_number):
+            return False
         openai_api_key = self.env['asterisk_plus.settings'].sudo().get_param('openai_api_key')
         if not openai_api_key:
             if fail_silently:
