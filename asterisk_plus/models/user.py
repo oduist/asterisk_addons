@@ -3,7 +3,8 @@ import logging
 import re
 from odoo import models, fields, api, tools, release, release, SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
-from passlib import pwd
+import secrets
+import string
 from random import choice
 from .server import get_default_server
 from .settings import debug
@@ -210,7 +211,7 @@ class PbxUser(models.Model):
                 'server': server.id,
                 'asterisk_user': asterisk_user.id,
                 'sip_user': sip_user,
-                'sip_password': pwd.genword(length=choice(range(12,16))),
+                'sip_password': ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(choice(range(12, 16)))),
             })
             debug(self, 'Create sip_user {} id {} for {}'.format(user_channel.sip_user, user_channel.id, user.login))
             next_extension += 1

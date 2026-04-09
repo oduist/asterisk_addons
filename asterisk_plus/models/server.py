@@ -320,9 +320,25 @@ class Server(models.Model):
         """Called from server form to test AMI connectivity.
         """
         try:
-            self.ami_action({'Action': 'Ping'}, res_notify_uid=self.env.user.id)
+            self.ami_action({'Action': 'Ping'},
+                            res_model='asterisk_plus.server',
+                            res_method='asterisk_ping_response',
+                            pass_back={'notify_uid': self.env.user.id})
         except Exception as e:
             raise ValidationError(str(e))
+
+    @api.model
+    def asterisk_ping_response(self, data, notify_uid=None):
+        if isinstance(data, dict) and data.get('Response') == 'Success':
+            message = 'Asterisk AMI Ping: Pong'
+        elif isinstance(data, dict) and data.get('Response') == 'Error':
+            message = 'Asterisk AMI Ping failed: {}'.format(
+                data.get('Message', 'Unknown error'))
+        else:
+            message = 'Asterisk AMI Ping: {}'.format(data)
+        self.env['asterisk_plus.settings'].asterisk_plus_notify(
+            message, title='Asterisk Ping', notify_uid=notify_uid)
+        return True
 
     @api.model
     def originate_call(self, number, model=None, res_id=None, user=None, dtmf_variables=None):
@@ -472,12 +488,57 @@ class Server(models.Model):
         self.ami_action(
             action,
             timeout=delay,
-            res_notify_uid=notify_uid or self.env.uid)
+            res_model='asterisk_plus.server',
+            res_method='reload_action_response',
+            pass_back={'notify_uid': notify_uid or self.env.uid})
+
+    @api.model
+    def reload_action_response(self, data, notify_uid=None):
+        if isinstance(data, dict) and data.get('Response') == 'Success':
+            message = 'Asterisk configuration reloaded successfully.'
+            warning = False
+        elif isinstance(data, dict) and data.get('Response') == 'Error':
+            message = 'Reload failed: {}'.format(
+                data.get('Message', 'Unknown error'))
+            warning = True
+        else:
+            message = '{}'.format(data)
+            warning = False
+        self.env['asterisk_plus.settings'].asterisk_plus_notify(
+            message, title='Reload Config', notify_uid=notify_uid,
+            warning=warning)
+        return True
 
     def get_system_information(self):
         self.ensure_one()
         action = {'Action': 'CoreStatus'}
-        self.ami_action(action, res_notify_uid=self.env.uid)
+        self.ami_action(action,
+                        res_model='asterisk_plus.server',
+                        res_method='system_information_response',
+                        pass_back={'notify_uid': self.env.uid})
+
+    @api.model
+    def system_information_response(self, data, notify_uid=None):
+        if isinstance(data, dict) and data.get('Response') == 'Error':
+            message = 'Error: {}'.format(data.get('Message', 'Unknown error'))
+            warning = True
+        elif isinstance(data, dict) and data.get('Response') == 'Success':
+            parts = []
+            if data.get('CoreStartupDate'):
+                parts.append('Started: {} {}'.format(
+                    data['CoreStartupDate'],
+                    data.get('CoreStartupTime', '')))
+            if data.get('CoreCurrentCalls'):
+                parts.append('Active calls: {}'.format(data['CoreCurrentCalls']))
+            message = '\n'.join(parts) if parts else 'Asterisk is running'
+            warning = False
+        else:
+            message = '{}'.format(data)
+            warning = False
+        self.env['asterisk_plus.settings'].asterisk_plus_notify(
+            message, title='System Information', notify_uid=notify_uid,
+            warning=warning)
+        return True
 
     @api.model
     def generate_voicemail_conf(self):
