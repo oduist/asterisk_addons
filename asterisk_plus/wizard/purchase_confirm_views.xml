@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_asterisk_plus_purchase_confirm_form" model="ir.ui.view">
+        <field name="name">asterisk_plus.purchase_confirm.form</field>
+        <field name="model">asterisk_plus.purchase_confirm</field>
+        <field name="arch" type="xml">
+            <form string="Order Summary">
+                <sheet>
+                    <div class="text-center mb-3">
+                        <h3>Order Summary</h3>
+                    </div>
+                    <group>
+                        <field name="subtotal" widget="monetary" string="Subtotal"
+                               options="{'currency_id': false}" readonly="1"/>
+                        <field name="discount_label" string="Discount" readonly="1"
+                               invisible="not has_discount"/>
+                        <field name="discount_amount" widget="monetary" string="Discount Amount"
+                               options="{'currency_id': false}" readonly="1"
+                               invisible="not has_discount"/>
+                        <field name="total" widget="monetary" string="Total"
+                               options="{'currency_id': false}" readonly="1"/>
+                    </group>
+                    <field name="payment_link" invisible="1"/>
+                    <field name="has_discount" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button string="Proceed to Checkout" type="object"
+                            name="action_proceed" class="btn-primary oe_highlight" close="1"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
