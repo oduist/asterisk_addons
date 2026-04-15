@@ -8,6 +8,7 @@
             <i t-if="state.type === 'danger'" class="fa fa-exclamation-circle me-2"/>
             <span t-esc="state.message"/>
         </div>
+        <div t-else=""/>
     </t>
 
 </templates>

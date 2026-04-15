@@ -11,4 +11,15 @@
     <field name="perm_unlink" eval="1"/>
   </record>
 
+  <!-- Purchase Confirm Wizard -->
+  <record id="purchase_confirm_admin" model="ir.model.access">
+    <field name="name">purchase_confirm_admin</field>
+    <field name="model_id" ref="asterisk_plus.model_asterisk_plus_purchase_confirm"/>
+    <field name="group_id" ref="base.group_system"/>
+    <field name="perm_read" eval="1"/>
+    <field name="perm_write" eval="1"/>
+    <field name="perm_create" eval="1"/>
+    <field name="perm_unlink" eval="1"/>
+  </record>
+
 </odoo>

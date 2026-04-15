@@ -508,10 +508,23 @@ class OduistLicense(models.Model):
 
         if response and response.get("payment_link"):
             _logger.info(f"License buy result: {response}")
+            pricing = response.get("pricing", {})
+            discount = pricing.get("discount")
+            wizard = self.env['asterisk_plus.purchase_confirm'].create({
+                'payment_link': response["payment_link"],
+                'subtotal': pricing.get("subtotal", 0),
+                'discount_label': discount.get("label", "") if discount else "",
+                'discount_amount': discount.get("amount", 0) if discount else 0,
+                'total': pricing.get("total", pricing.get("subtotal", 0)),
+                'has_discount': bool(discount),
+            })
             return {
-                "type": "ir.actions.act_url",
-                "url": response["payment_link"],
-                "target": "new",
+                'type': 'ir.actions.act_window',
+                'name': 'Order Summary',
+                'res_model': 'asterisk_plus.purchase_confirm',
+                'res_id': wizard.id,
+                'view_mode': 'form',
+                'target': 'new',
             }
         else:
             error_msg = f"License buy failed: {response}"
