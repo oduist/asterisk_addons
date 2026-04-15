@@ -13,10 +13,10 @@
                         <field name="subtotal" widget="monetary" string="Subtotal"
                                options="{'currency_id': false}" readonly="1"/>
                         <field name="discount_label" string="Discount" readonly="1"
-                               invisible="not has_discount"/>
+                               attrs="{'invisible': [('has_discount', '=', False)]}"/>
                         <field name="discount_amount" widget="monetary" string="Discount Amount"
                                options="{'currency_id': false}" readonly="1"
-                               invisible="not has_discount"/>
+                               attrs="{'invisible': [('has_discount', '=', False)]}"/>
                         <field name="total" widget="monetary" string="Total"
                                options="{'currency_id': false}" readonly="1"/>
                     </group>
