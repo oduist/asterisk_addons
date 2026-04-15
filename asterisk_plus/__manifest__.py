@@ -56,6 +56,7 @@
         'wizard/set_notes.xml',
         'wizard/call.xml',
         'wizard/set_channel_transport_wizard.xml',
+        'wizard/purchase_confirm_views.xml',
         # Reports
         'reports/reports.xml',
         'reports/calls_report.xml',
