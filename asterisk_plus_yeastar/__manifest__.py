@@ -4,7 +4,7 @@
     'name': 'Asterisk Plus Yeastar',
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'author': 'Oduist',
-    'price': 0,
+    'price': 0,  # 30 days free trial
     'version': '1.0.1',
     'currency': 'EUR',
     'maintainer': 'Oduist',
@@ -12,7 +12,10 @@
     'license': 'Other proprietary',
     'category': 'Phone',
     'summary': 'Asterisk Plus Yeastar integration',
-    'description': "",
+    'description': """
+30-day free trial. A license purchase is required to continue using
+this module after the trial period expires.
+""",
     'depends': ['asterisk_plus'],
     'data': [
         'views/server.xml',
