@@ -4,7 +4,7 @@
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'description': """Ring group configuration added""",
     'currency': 'EUR',
-    'price': '0',
+    'price': '0',  # 30 days free trial
     'version': '1.2.1',
     'category': 'Phone',
     'author': 'Oduist',

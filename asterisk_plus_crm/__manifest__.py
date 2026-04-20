@@ -4,7 +4,7 @@
     'name': 'Asterisk Plus CRM',
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
     'author': 'Oduist',
-    'price': 0,
+    'price': 0,  # 30 days free trial
     'version': '2.0.1',
     'currency': 'EUR',
     'maintainer': 'Oduist',
