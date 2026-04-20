@@ -4,7 +4,7 @@
     'name': 'Asterisk Plus Helpdesk',
     'version': '2.0.1',
     'author': 'Oduist',
-    'price': 299,
+    'price': 299,  # 30 days free trial
     'currency': 'EUR',
     'maintainer': 'Oduist',
     'live_test_url': 'https://pbx-demo-18.oduist.com/',
