@@ -21,12 +21,7 @@
         <form create="false" delete="false">
             <sheet>
               <notebook>
-<<<<<<< HEAD
-                <page name="general" string="General"
-                      attrs="{'invisible': [('is_registered', '=', False)]}">
-=======
                 <page name="general" string="General">
->>>>>>> 330df6c ([OPL] Implement Oduist Proprietary License system for PBX modules)
                   <group>
                     <group>
                       <field name="module_version"/>
@@ -46,12 +41,7 @@
                     </group>
                   </group>
                 </page>
-<<<<<<< HEAD
-                <page name="calls" string="Calls"
-                      attrs="{'invisible': [('is_registered', '=', False)]}">
-=======
                 <page name="calls" string="Calls">
->>>>>>> 330df6c ([OPL] Implement Oduist Proprietary License system for PBX modules)
                   <group>
                       <group string="Call Options" name="options" >
                         <field name="auto_create_partners" readonly="1" help="Enterprise Feature"/>
@@ -95,11 +85,7 @@
                     </group>
                 </page>
                 <page name="transcription" string="Transcription"
-<<<<<<< HEAD
-                      attrs="{'invisible': ['|',('record_calls', '=', False),('is_registered', '=', False)]}">
-=======
-                      invisible="record_calls == False">
->>>>>>> 330df6c ([OPL] Implement Oduist Proprietary License system for PBX modules)
+                      attrs="{'invisible': [('record_calls', '=', False)]}">
                   <group>
                     <group>
                       <field name="transcribe_calls"/>
