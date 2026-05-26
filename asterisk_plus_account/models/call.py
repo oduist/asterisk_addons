@@ -18,8 +18,8 @@ class AccountCall(models.Model):
                     [
                         ('partner_id', '=', self.partner.id),
                         ('state', '=', 'posted'),
-                        ('type', 'in', ['out_invoice', 'in_invoice']),
-                        ('invoice_payment_state', '!=', 'paid'),
+                        ('move_type', 'in', ['out_invoice', 'in_invoice']),
+                        ('payment_state', '!=', 'paid'),
                     ], limit=1)
                 if account_move:
                     self.sudo().ref = account_move
