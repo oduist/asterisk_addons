@@ -39,15 +39,15 @@
                             <label for="subscribe_to_updates" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
                             <field name="subscribe_to_updates" class="w-25 w-sm-50 w-md-50 w-lg-75"/>
                         </div>
-                        <div class="d-flex flex-row" invisible="not subscribe_to_security_alerts and not subscribe_to_onboarding and not subscribe_to_updates">
+                        <div class="d-flex flex-row" attrs="{'invisible': [('subscribe_to_security_alerts', '=', False), ('subscribe_to_onboarding', '=', False), ('subscribe_to_updates', '=', False)]}">
                             <label for="subscribe_email" string="Email for notifications" class="me-2 w-75 w-sm-50 w-md-50 w-lg-25"/>
-                            <field name="subscribe_email" class="w-25 w-sm-50 w-md-50 w-lg-75" required="subscribe_to_security_alerts or subscribe_to_onboarding or subscribe_to_updates"/>
+                            <field name="subscribe_email" class="w-25 w-sm-50 w-md-50 w-lg-75" attrs="{'required': ['|', '|', ('subscribe_to_security_alerts', '=', True), ('subscribe_to_onboarding', '=', True), ('subscribe_to_updates', '=', True)]}"/>
                         </div>
                         <group col="2">
                             <div colspan="2">
                                 <button name="update_license_status" string="UPDATE LICENSE / PRICING" type="object" class="btn-success me-2"/>
                                 <field name="all_modules_purchased" invisible="1"/>
-                                <button name="buy_all_licenses" string="BUY ALL MODULES" type="object" class="btn-warning" invisible="all_modules_purchased"/>
+                                <button name="buy_all_licenses" string="BUY ALL MODULES" type="object" class="btn-warning" attrs="{'invisible': [('all_modules_purchased', '=', True)]}"/>
                             </div>
                             <field name="oduist_modules" nolabel="1" colspan="2">
                                 <tree create="false" delete="false" decoration-danger="oduist_license_status == 'Trial Expired'">
@@ -57,7 +57,7 @@
                                     <field name="oduist_license_status" string="License Status" readonly="1"/>
                                     <field name="oduist_module_show_price" string="Info" readonly="1"/>
                                     <field name="oduist_module_purchased" invisible="1"/>
-                                    <button name="buy_oduist_license" string="Buy Module" type="object" class="btn-warning btn-sm" invisible="oduist_module_purchased"/>
+                                    <button name="buy_oduist_license" string="Buy Module" type="object" class="btn-warning btn-sm" attrs="{'invisible': [('oduist_module_purchased', '=', True)]}"/>
                                 </tree>
                             </field>
                         </group>

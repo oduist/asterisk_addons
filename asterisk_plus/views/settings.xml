@@ -95,11 +95,7 @@
                     </group>
                 </page>
                 <page name="transcription" string="Transcription"
-<<<<<<< HEAD
                       attrs="{'invisible': ['|',('record_calls', '=', False),('is_registered', '=', False)]}">
-=======
-                      invisible="record_calls == False">
->>>>>>> 330df6c ([OPL] Implement Oduist Proprietary License system for PBX modules)
                   <group>
                     <group>
                       <field name="transcribe_calls"/>
