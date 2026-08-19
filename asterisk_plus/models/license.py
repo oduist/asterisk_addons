@@ -382,7 +382,8 @@ class OduistLicense(models.Model):
 
         request_data = {
             "instance_hash": instance_uid,
-            "odoo_version": release.version_info[0],
+            # License server validates odoo_version as a string (e.g. "15").
+            "odoo_version": str(release.version_info[0]),
             "installed_modules": installed_modules,
         }
 
